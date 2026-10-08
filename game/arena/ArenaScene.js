@@ -1,4 +1,5 @@
 import { AutoCombat } from '../combat/AutoCombat.js';
+import { HealthSystem } from '../health/HealthSystem.js';
 import { AutoMovement } from '../movement/AutoMovement.js';
 import { Player } from '../player/Player.js';
 
@@ -51,7 +52,7 @@ export class ArenaScene extends Phaser.Scene {
     );
 
     this.add
-      .text(width / 2, 26, 'LIVE ARENA • v0.04', {
+      .text(width / 2, 26, 'LIVE ARENA • v0.05', {
         fontFamily: 'Arial, sans-serif',
         fontSize: '22px',
         fontStyle: 'bold',
@@ -70,6 +71,9 @@ export class ArenaScene extends Phaser.Scene {
         })
     );
 
+    this.healthSystems = this.players.map(
+      (player) => new HealthSystem(this, player)
+    );
     this.movements = this.players.map((player) => new AutoMovement(player));
     this.combats = this.players.map(
       (player) => new AutoCombat(this, player, () => this.players)
@@ -79,5 +83,6 @@ export class ArenaScene extends Phaser.Scene {
   update(time, delta) {
     this.movements?.forEach((movement) => movement.update(time, delta));
     this.combats?.forEach((combat) => combat.update(time));
+    this.healthSystems?.forEach((health) => health.update());
   }
 }

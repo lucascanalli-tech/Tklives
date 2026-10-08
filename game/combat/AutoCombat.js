@@ -2,6 +2,7 @@ const ATTACK_RANGE = 150;
 const ATTACK_COOLDOWN = 900;
 const SEARCH_INTERVAL = 180;
 const EFFECT_DURATION = 140;
+const ATTACK_DAMAGE = 20;
 
 export class AutoCombat {
   constructor(scene, player, getPlayers) {
@@ -12,7 +13,7 @@ export class AutoCombat {
   }
 
   update(time) {
-    if (time < this.nextActionTime) {
+    if (!this.player.isAlive() || time < this.nextActionTime) {
       return;
     }
 
@@ -32,7 +33,7 @@ export class AutoCombat {
     let nearestDistance = ATTACK_RANGE;
 
     for (const candidate of this.getPlayers()) {
-      if (candidate === this.player) {
+      if (candidate === this.player || !candidate.isAlive()) {
         continue;
       }
 
@@ -53,6 +54,12 @@ export class AutoCombat {
   }
 
   attack(target) {
+    const damageApplied = target.health?.takeDamage(ATTACK_DAMAGE);
+
+    if (!damageApplied) {
+      return;
+    }
+
     const effect = this.scene.add.graphics();
     effect.lineStyle(4, 0xfde047, 0.95);
     effect.lineBetween(

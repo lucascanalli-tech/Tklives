@@ -22,6 +22,10 @@ export class AutoMovement {
   }
 
   update(time, delta) {
+    if (!this.player.isAlive()) {
+      return;
+    }
+
     if (time >= this.nextDirectionChange) {
       this.chooseDirection(time);
     }
