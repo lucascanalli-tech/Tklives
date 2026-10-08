@@ -2,8 +2,12 @@ import { AutoCombat } from '../combat/AutoCombat.js';
 import { HealthSystem } from '../health/HealthSystem.js';
 import { AutoMovement } from '../movement/AutoMovement.js';
 import { Player } from '../player/Player.js';
+import { RankingView } from '../score/RankingView.js';
+import { ScoreSystem } from '../score/ScoreSystem.js';
 
 const ARENA_MARGIN = 56;
+const RANKING_MARGIN = 16;
+const RANKING_WIDTH = 230;
 
 const TEST_PLAYERS = [
   { username: 'Lucas', x: 0.18, y: 0.28, color: 0x38bdf8 },
@@ -52,7 +56,7 @@ export class ArenaScene extends Phaser.Scene {
     );
 
     this.add
-      .text(width / 2, 26, 'LIVE ARENA • v0.05', {
+      .text(width / 2, 26, 'LIVE ARENA • v0.06', {
         fontFamily: 'Arial, sans-serif',
         fontSize: '22px',
         fontStyle: 'bold',
@@ -71,9 +75,20 @@ export class ArenaScene extends Phaser.Scene {
         })
     );
 
+    this.scoreSystem = new ScoreSystem(this.players);
+
+    this.rankingView = new RankingView(this, this.scoreSystem, {
+      x: arenaBounds.right - RANKING_WIDTH - RANKING_MARGIN,
+      y: arenaBounds.top + RANKING_MARGIN
+    });
+
     this.healthSystems = this.players.map(
-      (player) => new HealthSystem(this, player)
+      (player) =>
+        new HealthSystem(this, player, (attacker, victim) =>
+          this.scoreSystem.registerKill(attacker, victim)
+        )
     );
+
     this.movements = this.players.map((player) => new AutoMovement(player));
     this.combats = this.players.map(
       (player) => new AutoCombat(this, player, () => this.players)

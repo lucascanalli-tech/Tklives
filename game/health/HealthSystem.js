@@ -4,9 +4,10 @@ const BAR_WIDTH = 48;
 const BAR_HEIGHT = 7;
 
 export class HealthSystem {
-  constructor(scene, player) {
+  constructor(scene, player, onDeath = null) {
     this.scene = scene;
     this.player = player;
+    this.onDeath = onDeath;
     this.maxHealth = MAX_HEALTH;
     this.currentHealth = MAX_HEALTH;
     this.respawnTimer = null;
@@ -34,7 +35,7 @@ export class HealthSystem {
     this.fill.setPosition(x - BAR_WIDTH / 2, y);
   }
 
-  takeDamage(amount) {
+  takeDamage(amount, attacker = null) {
     if (!this.player.isAlive() || amount <= 0) {
       return false;
     }
@@ -43,7 +44,7 @@ export class HealthSystem {
     this.updateBar();
 
     if (this.currentHealth === 0) {
-      this.die();
+      this.die(attacker);
     }
 
     return true;
@@ -54,10 +55,12 @@ export class HealthSystem {
     this.fill.setScale(ratio, 1);
   }
 
-  die() {
+  die(attacker) {
     this.player.setAlive(false);
     this.background.setVisible(false);
     this.fill.setVisible(false);
+
+    this.onDeath?.(attacker, this.player);
 
     this.respawnTimer = this.scene.time.delayedCall(
       RESPAWN_DELAY,

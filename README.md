@@ -4,13 +4,13 @@ Jogo 2D automático para TikTok LIVE.
 
 ## Versão atual
 
-**v0.05 — Vida, dano, morte e respawn (aguardando validação no computador)**
+**v0.06 — Pontuação e ranking (aguardando validação no computador)**
 
-A v0.04 — Combate automático foi aprovada no computador real. Esta versão transforma os ataques em combate real: cada personagem começa com 100 de vida, recebe 20 de dano por ataque, exibe uma barra de vida, morre ao chegar a zero e reaparece automaticamente após aproximadamente 2 segundos com vida cheia em uma nova posição válida da arena.
+A v0.05 — Vida, dano, morte e respawn foi aprovada no computador real. Esta versão adiciona pontuação por eliminação e um ranking visual atualizado automaticamente durante o jogo.
 
-Personagens mortos não se movimentam nem atacam enquanto aguardam o respawn.
+Cada personagem começa com 0 pontos. Quando um personagem vivo causa o golpe final em outro personagem válido, recebe 1 ponto. A pontuação permanece após o respawn.
 
-Ainda não existem pontuação, ranking, rodadas, WebSocket ou integração com TikTok.
+Ainda não existem rodadas, reset automático de pontuação, WebSocket, banco de dados ou integração com TikTok.
 
 ## Requisitos
 
@@ -37,21 +37,20 @@ Abra no navegador:
 http://localhost:8080
 ```
 
-## Resultado esperado da v0.05
+## Resultado esperado da v0.06
 
 A tela deve mostrar:
 
 - a arena 2D responsiva;
 - seis personagens se movimentando e atacando automaticamente;
-- uma barra de vida acompanhando cada personagem;
-- 100 de vida máxima por personagem;
-- redução de 20 de vida a cada ataque recebido;
-- desaparecimento do personagem quando a vida chega a zero;
-- personagem morto sem movimento e sem ataques;
-- respawn automático após aproximadamente 2 segundos;
-- retorno com vida cheia em uma posição válida da arena;
-- vários personagens podendo morrer e reaparecer de forma independente;
-- todos os `@nomes` acompanhando corretamente os personagens;
-- nenhuma pontuação, ranking, rodada ou integração externa.
+- vida, dano, morte e respawn funcionando como na v0.05;
+- um painel `RANKING` visível na arena;
+- todos os jogadores começando com 0 pontos;
+- +1 ponto para o personagem que causar o golpe final;
+- ranking ordenado automaticamente da maior para a menor pontuação;
+- `@nome` e quantidade de pontos em cada linha;
+- pontuação preservada após o respawn;
+- vários personagens podendo pontuar durante a mesma execução;
+- nenhuma rodada, reset automático de pontuação ou integração externa.
 
 Para encerrar o servidor, pressione `Ctrl+C` no terminal.

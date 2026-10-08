@@ -54,7 +54,10 @@ export class AutoCombat {
   }
 
   attack(target) {
-    const damageApplied = target.health?.takeDamage(ATTACK_DAMAGE);
+    const damageApplied = target.health?.takeDamage(
+      ATTACK_DAMAGE,
+      this.player
+    );
 
     if (!damageApplied) {
       return;
