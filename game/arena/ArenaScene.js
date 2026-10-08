@@ -1,3 +1,4 @@
+import { AutoCombat } from '../combat/AutoCombat.js';
 import { AutoMovement } from '../movement/AutoMovement.js';
 import { Player } from '../player/Player.js';
 
@@ -50,7 +51,7 @@ export class ArenaScene extends Phaser.Scene {
     );
 
     this.add
-      .text(width / 2, 26, 'LIVE ARENA • v0.03', {
+      .text(width / 2, 26, 'LIVE ARENA • v0.04', {
         fontFamily: 'Arial, sans-serif',
         fontSize: '22px',
         fontStyle: 'bold',
@@ -70,9 +71,13 @@ export class ArenaScene extends Phaser.Scene {
     );
 
     this.movements = this.players.map((player) => new AutoMovement(player));
+    this.combats = this.players.map(
+      (player) => new AutoCombat(this, player, () => this.players)
+    );
   }
 
   update(time, delta) {
     this.movements?.forEach((movement) => movement.update(time, delta));
+    this.combats?.forEach((combat) => combat.update(time));
   }
 }
