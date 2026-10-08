@@ -1,4 +1,15 @@
+import { Player } from '../player/Player.js';
+
 const ARENA_MARGIN = 56;
+
+const TEST_PLAYERS = [
+  { username: 'Lucas', x: 0.18, y: 0.28, color: 0x38bdf8 },
+  { username: 'Maria', x: 0.5, y: 0.22, color: 0xf472b6 },
+  { username: 'Joao', x: 0.78, y: 0.3, color: 0xfbbf24 },
+  { username: 'Ana', x: 0.28, y: 0.66, color: 0x34d399 },
+  { username: 'Bia', x: 0.58, y: 0.62, color: 0xa78bfa },
+  { username: 'Rafa', x: 0.82, y: 0.72, color: 0xfb7185 }
+];
 
 export class ArenaScene extends Phaser.Scene {
   constructor() {
@@ -9,43 +20,52 @@ export class ArenaScene extends Phaser.Scene {
     const { width, height } = this.scale;
     const arenaWidth = width - ARENA_MARGIN * 2;
     const arenaHeight = height - ARENA_MARGIN * 2;
+    const arenaBounds = new Phaser.Geom.Rectangle(
+      ARENA_MARGIN,
+      ARENA_MARGIN,
+      arenaWidth,
+      arenaHeight
+    );
 
     this.cameras.main.setBackgroundColor('#0f172a');
 
     const arena = this.add.graphics();
     arena.fillStyle(0x172033, 1);
     arena.fillRoundedRect(
-      ARENA_MARGIN,
-      ARENA_MARGIN,
-      arenaWidth,
-      arenaHeight,
+      arenaBounds.x,
+      arenaBounds.y,
+      arenaBounds.width,
+      arenaBounds.height,
       24
     );
 
     arena.lineStyle(4, 0x38bdf8, 1);
     arena.strokeRoundedRect(
-      ARENA_MARGIN,
-      ARENA_MARGIN,
-      arenaWidth,
-      arenaHeight,
+      arenaBounds.x,
+      arenaBounds.y,
+      arenaBounds.width,
+      arenaBounds.height,
       24
     );
 
     this.add
-      .text(width / 2, height / 2 - 18, 'LIVE ARENA', {
+      .text(width / 2, 26, 'LIVE ARENA • v0.02', {
         fontFamily: 'Arial, sans-serif',
-        fontSize: '44px',
+        fontSize: '22px',
         fontStyle: 'bold',
         color: '#f8fafc'
       })
       .setOrigin(0.5);
 
-    this.add
-      .text(width / 2, height / 2 + 34, 'v0.01 • Arena básica', {
-        fontFamily: 'Arial, sans-serif',
-        fontSize: '20px',
-        color: '#94a3b8'
-      })
-      .setOrigin(0.5);
+    this.players = TEST_PLAYERS.map(
+      ({ username, x, y, color }) =>
+        new Player(this, {
+          username,
+          x: arenaBounds.x + arenaBounds.width * x,
+          y: arenaBounds.y + arenaBounds.height * y,
+          color,
+          bounds: arenaBounds
+        })
+    );
   }
 }

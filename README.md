@@ -4,11 +4,11 @@ Jogo 2D automático para TikTok LIVE.
 
 ## Versão atual
 
-**v0.01 — Arena básica**
+**v0.02 — Personagens (aguardando validação no computador)**
 
-Esta versão contém somente a base visual do jogo: Phaser 3, arena 2D em 1280×720 e redimensionamento responsivo.
+Esta versão adiciona personagens visuais simples e estáticos dentro da arena, com suporte a vários personagens simultâneos e `@nome` acima de cada um.
 
-Ainda não existem personagens, bots, combate, ranking ou integração com TikTok.
+Ainda não existem movimento automático, combate, vida/dano, morte/respawn, ranking, WebSocket ou integração com TikTok.
 
 ## Requisitos
 
@@ -22,21 +22,26 @@ npm install
 npm start
 ```
 
+No Windows PowerShell, se o `npm.ps1` estiver bloqueado, use:
+
+```powershell
+npm.cmd install
+npm.cmd start
+```
+
 Abra no navegador:
 
 ```text
 http://localhost:8080
 ```
 
-## Resultado esperado
+## Resultado esperado da v0.02
 
 A tela deve mostrar:
 
-- fundo escuro;
-- arena retangular com borda azul;
-- título `LIVE ARENA`;
-- texto `v0.01 • Arena básica`;
-- proporção 16:9 em resolução lógica de 1280×720;
-- redimensionamento automático ao alterar o tamanho da janela.
+- a arena 2D responsiva da v0.01;
+- seis personagens circulares parados dentro dos limites da arena;
+- um `@nome` visível acima de cada personagem;
+- nenhum movimento ou combate.
 
 Para encerrar o servidor, pressione `Ctrl+C` no terminal.
