@@ -8,19 +8,12 @@ function normalizeUsername(username) {
 
 export class Player {
   constructor(scene, { username, x, y, color, bounds }) {
-    const safeX = Phaser.Math.Clamp(
-      x,
-      bounds.left + PLAYER_RADIUS,
-      bounds.right - PLAYER_RADIUS
-    );
-
-    const safeY = Phaser.Math.Clamp(
-      y,
-      bounds.top + TOP_LABEL_SPACE,
-      bounds.bottom - PLAYER_RADIUS
-    );
-
+    this.bounds = bounds;
     this.username = normalizeUsername(username);
+
+    const movementBounds = this.getMovementBounds();
+    const safeX = Phaser.Math.Clamp(x, movementBounds.left, movementBounds.right);
+    const safeY = Phaser.Math.Clamp(y, movementBounds.top, movementBounds.bottom);
 
     this.avatar = scene.add
       .circle(safeX, safeY, PLAYER_RADIUS, color)
@@ -36,5 +29,23 @@ export class Player {
         strokeThickness: 4
       })
       .setOrigin(0.5, 1);
+  }
+
+  getMovementBounds() {
+    return {
+      left: this.bounds.left + PLAYER_RADIUS,
+      right: this.bounds.right - PLAYER_RADIUS,
+      top: this.bounds.top + TOP_LABEL_SPACE,
+      bottom: this.bounds.bottom - PLAYER_RADIUS
+    };
+  }
+
+  setPosition(x, y) {
+    const movementBounds = this.getMovementBounds();
+    const safeX = Phaser.Math.Clamp(x, movementBounds.left, movementBounds.right);
+    const safeY = Phaser.Math.Clamp(y, movementBounds.top, movementBounds.bottom);
+
+    this.avatar.setPosition(safeX, safeY);
+    this.nameText.setPosition(safeX, safeY - PLAYER_RADIUS - NAME_GAP);
   }
 }

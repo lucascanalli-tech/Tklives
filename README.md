@@ -4,11 +4,11 @@ Jogo 2D automático para TikTok LIVE.
 
 ## Versão atual
 
-**v0.02 — Personagens (aguardando validação no computador)**
+**v0.03 — Movimento automático (aguardando validação no computador)**
 
-Esta versão adiciona personagens visuais simples e estáticos dentro da arena, com suporte a vários personagens simultâneos e `@nome` acima de cada um.
+A v0.02 — Personagens foi aprovada no computador real. Esta versão adiciona movimento automático aos personagens: cada um escolhe direções sozinho, se movimenta simultaneamente aos demais e permanece dentro dos limites da arena com o `@nome` acompanhando sua posição.
 
-Ainda não existem movimento automático, combate, vida/dano, morte/respawn, ranking, WebSocket ou integração com TikTok.
+Ainda não existem combate, vida/dano, morte/respawn, ranking, WebSocket ou integração com TikTok.
 
 ## Requisitos
 
@@ -35,13 +35,15 @@ Abra no navegador:
 http://localhost:8080
 ```
 
-## Resultado esperado da v0.02
+## Resultado esperado da v0.03
 
 A tela deve mostrar:
 
-- a arena 2D responsiva da v0.01;
-- seis personagens circulares parados dentro dos limites da arena;
-- um `@nome` visível acima de cada personagem;
-- nenhum movimento ou combate.
+- a arena 2D responsiva;
+- seis personagens circulares se movimentando ao mesmo tempo;
+- cada personagem mudando de direção automaticamente;
+- todos os personagens permanecendo dentro dos limites da arena;
+- o `@nome` acompanhando corretamente cada personagem;
+- nenhum combate, vida, ranking ou integração externa.
 
 Para encerrar o servidor, pressione `Ctrl+C` no terminal.

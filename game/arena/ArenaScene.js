@@ -1,3 +1,4 @@
+import { AutoMovement } from '../movement/AutoMovement.js';
 import { Player } from '../player/Player.js';
 
 const ARENA_MARGIN = 56;
@@ -49,7 +50,7 @@ export class ArenaScene extends Phaser.Scene {
     );
 
     this.add
-      .text(width / 2, 26, 'LIVE ARENA • v0.02', {
+      .text(width / 2, 26, 'LIVE ARENA • v0.03', {
         fontFamily: 'Arial, sans-serif',
         fontSize: '22px',
         fontStyle: 'bold',
@@ -67,5 +68,11 @@ export class ArenaScene extends Phaser.Scene {
           bounds: arenaBounds
         })
     );
+
+    this.movements = this.players.map((player) => new AutoMovement(player));
+  }
+
+  update(time, delta) {
+    this.movements?.forEach((movement) => movement.update(time, delta));
   }
 }
