@@ -9,22 +9,9 @@ export class RankingView {
     this.scoreSystem = scoreSystem;
     this.x = x;
     this.y = y;
+    this.rows = [];
 
-    const playerCount = this.scoreSystem.getRanking().length;
-    const panelHeight = PADDING * 2 + HEADER_HEIGHT + playerCount * ROW_HEIGHT;
-
-    this.background = scene.add
-      .rectangle(
-        x,
-        y,
-        PANEL_WIDTH,
-        panelHeight,
-        0x0f172a,
-        0.88
-      )
-      .setOrigin(0, 0)
-      .setStrokeStyle(2, 0x38bdf8, 0.75)
-      .setDepth(20);
+    this.background = scene.add.graphics().setDepth(20);
 
     this.title = scene.add
       .text(x + PADDING, y + PADDING, 'RANKING', {
@@ -35,11 +22,18 @@ export class RankingView {
       })
       .setDepth(21);
 
-    this.rows = Array.from({ length: playerCount }, (_, index) =>
-      scene.add
+    this.unsubscribe = this.scoreSystem.subscribe((ranking) =>
+      this.render(ranking)
+    );
+  }
+
+  ensureRows(count) {
+    while (this.rows.length < count) {
+      const index = this.rows.length;
+      const row = this.scene.add
         .text(
-          x + PADDING,
-          y + PADDING + HEADER_HEIGHT + index * ROW_HEIGHT,
+          this.x + PADDING,
+          this.y + PADDING + HEADER_HEIGHT + index * ROW_HEIGHT,
           '',
           {
             fontFamily: 'Arial, sans-serif',
@@ -47,18 +41,38 @@ export class RankingView {
             color: '#e2e8f0'
           }
         )
-        .setDepth(21)
-    );
+        .setDepth(21);
 
-    this.unsubscribe = this.scoreSystem.subscribe((ranking) =>
-      this.render(ranking)
-    );
+      this.rows.push(row);
+    }
   }
 
   render(ranking) {
+    this.ensureRows(ranking.length);
+
+    const panelHeight =
+      PADDING * 2 + HEADER_HEIGHT + Math.max(ranking.length, 1) * ROW_HEIGHT;
+
+    this.background.clear();
+    this.background.fillStyle(0x0f172a, 0.88);
+    this.background.fillRoundedRect(
+      this.x,
+      this.y,
+      PANEL_WIDTH,
+      panelHeight,
+      10
+    );
+    this.background.lineStyle(2, 0x38bdf8, 0.75);
+    this.background.strokeRoundedRect(
+      this.x,
+      this.y,
+      PANEL_WIDTH,
+      panelHeight,
+      10
+    );
+
     this.rows.forEach((row, index) => {
       const entry = ranking[index];
-
       row.setText(
         entry ? `${index + 1}. ${entry.username} — ${entry.score} pts` : ''
       );

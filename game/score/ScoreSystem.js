@@ -1,15 +1,27 @@
 export class ScoreSystem {
-  constructor(players) {
-    this.entries = new Map(
-      players.map((player, index) => [
-        player,
-        {
-          score: 0,
-          order: index
-        }
-      ])
-    );
+  constructor(players = []) {
+    this.entries = new Map();
     this.listeners = new Set();
+    this.nextOrder = 0;
+
+    players.forEach((player) => this.addPlayer(player, false));
+  }
+
+  addPlayer(player, notify = true) {
+    if (!player || this.entries.has(player)) {
+      return false;
+    }
+
+    this.entries.set(player, {
+      score: 0,
+      order: this.nextOrder++
+    });
+
+    if (notify) {
+      this.notify();
+    }
+
+    return true;
   }
 
   registerKill(attacker, victim) {
