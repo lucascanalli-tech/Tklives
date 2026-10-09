@@ -9,6 +9,7 @@
   },
   "scripts": {
     "start": "node server/server.js",
+    "start:ws-test": "node server/server.js --ws-test",
     "start:live": "node --env-file=.env server/server.js"
   },
   "dependencies": {

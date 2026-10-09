@@ -74,6 +74,22 @@ npm.cmd install
 npm.cmd start
 ```
 
+## Teste do WebSocket sem TikTok LIVE
+
+Antes da LIVE real, execute:
+
+```bash
+npm run start:ws-test
+```
+
+Abra:
+
+```text
+http://localhost:8080/?simulator=off
+```
+
+A cada 3 segundos o backend enviará um `COMMENT` de `@WebSocketTest`. Mesmo sem um `JOIN` anterior, o jogo deve criar esse personagem automaticamente e mostrar `WebSocket OK`. Isso confirma o caminho `backend -> WebSocket -> EventBus` sem depender do TikTok.
+
 ## Preparar teste com TikTok LIVE real
 
 1. Copie `.env.example` para um novo arquivo chamado `.env`.
