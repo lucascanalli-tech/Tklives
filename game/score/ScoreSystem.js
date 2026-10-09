@@ -1,18 +1,37 @@
+function getUserId(playerOrUserId) {
+  if (typeof playerOrUserId === 'string') {
+    return playerOrUserId;
+  }
+
+  return playerOrUserId?.userId;
+}
+
 export class ScoreSystem {
-  constructor(players = []) {
+  constructor(participants = []) {
     this.entries = new Map();
     this.listeners = new Set();
     this.nextOrder = 0;
 
-    players.forEach((player) => this.addPlayer(player, false));
+    participants.forEach((participant) => this.addParticipant(participant, false));
   }
 
-  addPlayer(player, notify = true) {
-    if (!player || this.entries.has(player)) {
+  addParticipant(participant, notify = true) {
+    const userId = String(participant?.userId ?? '').trim();
+
+    if (!userId) {
       return false;
     }
 
-    this.entries.set(player, {
+    const existing = this.entries.get(userId);
+
+    if (existing) {
+      existing.username = participant.username || existing.username;
+      return false;
+    }
+
+    this.entries.set(userId, {
+      userId,
+      username: participant.username,
       score: 0,
       order: this.nextOrder++
     });
@@ -25,47 +44,48 @@ export class ScoreSystem {
   }
 
   registerKill(attacker, victim) {
-    const attackerEntry = this.entries.get(attacker);
-    const victimEntry = this.entries.get(victim);
+    const attackerId = getUserId(attacker);
+    const victimId = getUserId(victim);
+    const attackerEntry = this.entries.get(attackerId);
+    const victimEntry = this.entries.get(victimId);
 
     if (
       !attackerEntry ||
       !victimEntry ||
-      attacker === victim ||
-      !attacker.isAlive()
+      attackerId === victimId ||
+      !attacker?.isAlive?.()
     ) {
       return false;
     }
 
     attackerEntry.score += 1;
     this.notify();
+
     return true;
   }
 
-  getScore(player) {
-    return this.entries.get(player)?.score ?? 0;
+  getScore(playerOrUserId) {
+    const userId = getUserId(playerOrUserId);
+    return this.entries.get(userId)?.score ?? 0;
   }
 
-  getRanking() {
-    return Array.from(this.entries.entries())
-      .map(([player, entry]) => ({
-        player,
-        username: player.username,
-        score: entry.score,
-        order: entry.order
-      }))
+  getRanking(limit = null) {
+    const ranking = Array.from(this.entries.values())
       .sort((a, b) => b.score - a.score || a.order - b.order);
+
+    return Number.isInteger(limit) && limit > 0
+      ? ranking.slice(0, limit)
+      : ranking;
   }
 
   subscribe(listener) {
     this.listeners.add(listener);
-    listener(this.getRanking());
+    listener();
 
     return () => this.listeners.delete(listener);
   }
 
   notify() {
-    const ranking = this.getRanking();
-    this.listeners.forEach((listener) => listener(ranking));
+    this.listeners.forEach((listener) => listener());
   }
 }

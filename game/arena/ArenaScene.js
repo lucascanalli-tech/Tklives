@@ -1,26 +1,23 @@
-import { AutoCombat } from '../combat/AutoCombat.js';
+import { ActivePlayerManager } from './ActivePlayerManager.js';
+import {
+  LOAD_TEST_ROTATION_MS,
+  MAX_ACTIVE_PLAYERS,
+  getLoadTestUserCount
+} from '../config/GameConfig.js';
 import { InteractionEffects } from '../effects/InteractionEffects.js';
 import { EventBus } from '../events/EventBus.js';
 import { EventLogView } from '../events/EventLogView.js';
 import { EventSimulator } from '../events/EventSimulator.js';
+import { LoadTestSimulator } from '../events/LoadTestSimulator.js';
 import { WebSocketEventSource } from '../events/WebSocketEventSource.js';
-import { HealthSystem } from '../health/HealthSystem.js';
-import { AutoMovement } from '../movement/AutoMovement.js';
-import { Player } from '../player/Player.js';
+import { ParticipantRegistry } from '../participants/ParticipantRegistry.js';
+import { ParticipantStatsView } from '../participants/ParticipantStatsView.js';
 import { RankingView } from '../score/RankingView.js';
 import { ScoreSystem } from '../score/ScoreSystem.js';
 
 const ARENA_MARGIN = 56;
 const PANEL_MARGIN = 16;
 const RANKING_WIDTH = 230;
-const PLAYER_COLORS = [
-  0x38bdf8,
-  0xf472b6,
-  0xfbbf24,
-  0x34d399,
-  0xa78bfa,
-  0xfb7185
-];
 
 export class ArenaScene extends Phaser.Scene {
   constructor() {
@@ -39,17 +36,11 @@ export class ArenaScene extends Phaser.Scene {
       arenaHeight
     );
 
-    this.players = [];
-    this.playersByUserId = new Map();
-    this.healthSystems = [];
-    this.movements = [];
-    this.combats = [];
-
     this.cameras.main.setBackgroundColor('#0f172a');
     this.drawArena();
 
     this.add
-      .text(width / 2, 26, 'LIVE ARENA • v0.09', {
+      .text(width / 2, 26, 'LIVE ARENA • v0.08.1', {
         fontFamily: 'Arial, sans-serif',
         fontSize: '22px',
         fontStyle: 'bold',
@@ -57,47 +48,90 @@ export class ArenaScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
+    this.participantRegistry = new ParticipantRegistry(MAX_ACTIVE_PLAYERS);
     this.scoreSystem = new ScoreSystem();
+    this.activePlayerManager = new ActivePlayerManager(
+      this,
+      this.participantRegistry,
+      this.scoreSystem,
+      this.arenaBounds
+    );
+
     this.rankingView = new RankingView(this, this.scoreSystem, {
       x: this.arenaBounds.right - RANKING_WIDTH - PANEL_MARGIN,
       y: this.arenaBounds.top + PANEL_MARGIN
     });
 
+    this.participantStatsView = new ParticipantStatsView(
+      this,
+      this.participantRegistry,
+      {
+        x: this.arenaBounds.left + PANEL_MARGIN,
+        y: this.arenaBounds.bottom - PANEL_MARGIN
+      }
+    );
+
     this.eventBus = new EventBus();
+
+    this.unsubscribeParticipants = this.eventBus.subscribe((event) =>
+      this.handleParticipantEvent(event)
+    );
+
     this.eventLogView = new EventLogView(this, this.eventBus, {
       x: this.arenaBounds.left + PANEL_MARGIN,
       y: this.arenaBounds.top + PANEL_MARGIN
     });
 
-    this.unsubscribeJoin = this.eventBus.on('JOIN', (event) =>
-      this.addPlayerFromJoin(event)
-    );
-
     this.interactionEffects = new InteractionEffects(
       this,
       this.eventBus,
-      (userId) => this.playersByUserId.get(userId)
+      (userId) => this.activePlayerManager.getPlayer(userId)
     );
 
+    this.loadTestUserCount = getLoadTestUserCount();
     this.webSocketEventSource = new WebSocketEventSource(this.eventBus);
-    this.webSocketEventSource.start();
+
+    if (this.loadTestUserCount === 0) {
+      this.webSocketEventSource.start();
+    }
 
     const simulatorEnabled =
       new URLSearchParams(window.location.search).get('simulator') !== 'off';
 
-    this.eventSimulator = new EventSimulator(this.eventBus);
+    this.eventSimulator =
+      this.loadTestUserCount > 0
+        ? new LoadTestSimulator(this.eventBus, {
+            userCount: this.loadTestUserCount
+          })
+        : new EventSimulator(this.eventBus);
 
     if (simulatorEnabled) {
       this.eventSimulator.start();
     }
 
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      this.eventSimulator.stop();
-      this.webSocketEventSource.stop();
-      this.unsubscribeJoin?.();
-      this.interactionEffects.destroy();
-      this.eventLogView.unsubscribe?.();
-    });
+    if (this.loadTestUserCount > MAX_ACTIVE_PLAYERS) {
+      this.loadRotationTimer = this.time.addEvent({
+        delay: LOAD_TEST_ROTATION_MS,
+        loop: true,
+        callback: () => this.activePlayerManager.rotateOne()
+      });
+    }
+
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.shutdown());
+  }
+
+  handleParticipantEvent(event) {
+    const { participant, isNew } = this.participantRegistry.register(event);
+
+    if (!participant) {
+      return;
+    }
+
+    this.scoreSystem.addParticipant(participant);
+
+    if (isNew || participant.status === 'registered') {
+      this.activePlayerManager.requestParticipant(participant);
+    }
   }
 
   drawArena() {
@@ -121,44 +155,24 @@ export class ArenaScene extends Phaser.Scene {
     );
   }
 
-  addPlayerFromJoin(event) {
-    if (this.playersByUserId.has(event.userId)) {
-      return this.playersByUserId.get(event.userId);
-    }
-
-    const color = PLAYER_COLORS[this.players.length % PLAYER_COLORS.length];
-    const player = new Player(this, {
-      username: event.username,
-      x: Phaser.Math.FloatBetween(
-        this.arenaBounds.left + 120,
-        this.arenaBounds.right - 120
-      ),
-      y: Phaser.Math.FloatBetween(
-        this.arenaBounds.top + 100,
-        this.arenaBounds.bottom - 60
-      ),
-      color,
-      bounds: this.arenaBounds
-    });
-
-    this.players.push(player);
-    this.playersByUserId.set(event.userId, player);
-    this.scoreSystem.addPlayer(player);
-
-    const health = new HealthSystem(this, player, (attacker, victim) =>
-      this.scoreSystem.registerKill(attacker, victim)
-    );
-
-    this.healthSystems.push(health);
-    this.movements.push(new AutoMovement(player));
-    this.combats.push(new AutoCombat(this, player, () => this.players));
-
-    return player;
+  update(time, delta) {
+    this.activePlayerManager?.update(time, delta);
   }
 
-  update(time, delta) {
-    this.movements.forEach((movement) => movement.update(time, delta));
-    this.combats.forEach((combat) => combat.update(time));
-    this.healthSystems.forEach((health) => health.update());
+  shutdown() {
+    this.eventSimulator?.stop();
+    this.webSocketEventSource?.stop();
+    this.loadRotationTimer?.remove(false);
+    this.loadRotationTimer = null;
+
+    this.unsubscribeParticipants?.();
+    this.unsubscribeParticipants = null;
+
+    this.interactionEffects?.destroy();
+    this.eventLogView?.destroy();
+    this.rankingView?.destroy();
+    this.participantStatsView?.destroy();
+    this.activePlayerManager?.destroy();
+    this.eventBus?.destroy();
   }
 }

@@ -4,6 +4,7 @@ const PADDING = 14;
 const HEADER_HEIGHT = 34;
 const ROW_HEIGHT = 25;
 const MAX_ROWS = 7;
+const RENDER_DELAY = 80;
 
 function describeEvent(event) {
   switch (event.type) {
@@ -26,7 +27,9 @@ function describeEvent(event) {
 
 export class EventLogView {
   constructor(scene, eventBus, { x, y }) {
+    this.scene = scene;
     this.events = [];
+    this.renderTimer = null;
 
     this.background = scene.add
       .rectangle(x, y, PANEL_WIDTH, PANEL_HEIGHT, 0x0f172a, 0.88)
@@ -64,9 +67,33 @@ export class EventLogView {
   addEvent(event) {
     this.events.unshift(`[${event.type}] ${describeEvent(event)}`);
     this.events = this.events.slice(0, MAX_ROWS);
+    this.scheduleRender();
+  }
 
+  scheduleRender() {
+    if (this.renderTimer) {
+      return;
+    }
+
+    this.renderTimer = this.scene.time.delayedCall(RENDER_DELAY, () => {
+      this.renderTimer = null;
+      this.render();
+    });
+  }
+
+  render() {
     this.rows.forEach((row, index) => {
       row.setText(this.events[index] ?? '');
     });
+  }
+
+  destroy() {
+    this.unsubscribe?.();
+    this.unsubscribe = null;
+    this.renderTimer?.remove(false);
+    this.renderTimer = null;
+    this.background.destroy();
+    this.title.destroy();
+    this.rows.forEach((row) => row.destroy());
   }
 }

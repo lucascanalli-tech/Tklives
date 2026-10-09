@@ -82,4 +82,16 @@ export class HealthSystem {
     this.update();
     this.respawnTimer = null;
   }
+
+  destroy() {
+    this.respawnTimer?.remove(false);
+    this.respawnTimer = null;
+
+    if (this.player.health === this) {
+      this.player.health = null;
+    }
+
+    this.background.destroy();
+    this.fill.destroy();
+  }
 }

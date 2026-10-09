@@ -8,7 +8,8 @@ function normalizeUsername(username) {
 }
 
 export class Player {
-  constructor(scene, { username, x, y, color, bounds }) {
+  constructor(scene, { userId, username, x, y, color, bounds }) {
+    this.userId = String(userId);
     this.bounds = bounds;
     this.username = normalizeUsername(username);
     this.alive = true;
@@ -66,5 +67,10 @@ export class Player {
 
     this.avatar.setPosition(safeX, safeY);
     this.nameText.setPosition(safeX, safeY - PLAYER_RADIUS - NAME_GAP);
+  }
+
+  destroy() {
+    this.avatar.destroy();
+    this.nameText.destroy();
   }
 }

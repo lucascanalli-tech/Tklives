@@ -1,3 +1,5 @@
+import { LIKE_AGGREGATION_WINDOW_MS } from '../config/GameConfig.js';
+
 export const EVENT_TYPES = Object.freeze([
   'JOIN',
   'COMMENT',
@@ -18,6 +20,7 @@ export class EventBus {
   constructor() {
     this.listeners = new Set();
     this.typeListeners = new Map();
+    this.pendingLikes = new Map();
   }
 
   publish(event) {
@@ -29,20 +32,76 @@ export class EventBus {
       return false;
     }
 
-    const normalizedEvent = Object.freeze({
+    const normalizedEvent = {
       ...event,
       type,
       userId,
       username: normalizeUsername(username),
       timestamp: Number(event.timestamp) || Date.now()
-    });
+    };
 
-    this.listeners.forEach((listener) => listener(normalizedEvent));
-    this.typeListeners.get(type)?.forEach((listener) =>
-      listener(normalizedEvent)
+    if (type === 'LIKE') {
+      this.queueLike(normalizedEvent);
+      return true;
+    }
+
+    this.dispatch(Object.freeze(normalizedEvent));
+    return true;
+  }
+
+  queueLike(event) {
+    const count = Math.max(1, Number(event.count) || 1);
+    const pending = this.pendingLikes.get(event.userId);
+
+    if (pending) {
+      pending.count += count;
+      pending.event = {
+        ...event,
+        count: pending.count
+      };
+      return;
+    }
+
+    const entry = {
+      count,
+      event: {
+        ...event,
+        count
+      },
+      timer: null
+    };
+
+    entry.timer = setTimeout(
+      () => this.flushLike(event.userId),
+      LIKE_AGGREGATION_WINDOW_MS
     );
 
-    return true;
+    this.pendingLikes.set(event.userId, entry);
+  }
+
+  flushLike(userId) {
+    const pending = this.pendingLikes.get(userId);
+
+    if (!pending) {
+      return;
+    }
+
+    clearTimeout(pending.timer);
+    this.pendingLikes.delete(userId);
+    this.dispatch(Object.freeze(pending.event));
+  }
+
+  flushLikes() {
+    for (const userId of Array.from(this.pendingLikes.keys())) {
+      this.flushLike(userId);
+    }
+  }
+
+  dispatch(event) {
+    this.listeners.forEach((listener) => listener(event));
+    this.typeListeners.get(event.type)?.forEach((listener) =>
+      listener(event)
+    );
   }
 
   subscribe(listener) {
@@ -65,5 +124,15 @@ export class EventBus {
     listeners.add(listener);
 
     return () => listeners.delete(listener);
+  }
+
+  destroy() {
+    for (const pending of this.pendingLikes.values()) {
+      clearTimeout(pending.timer);
+    }
+
+    this.pendingLikes.clear();
+    this.listeners.clear();
+    this.typeListeners.clear();
   }
 }

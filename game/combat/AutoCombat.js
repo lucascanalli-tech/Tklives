@@ -5,10 +5,10 @@ const EFFECT_DURATION = 140;
 const ATTACK_DAMAGE = 20;
 
 export class AutoCombat {
-  constructor(scene, player, getPlayers) {
+  constructor(scene, player, getCandidates) {
     this.scene = scene;
     this.player = player;
-    this.getPlayers = getPlayers;
+    this.getCandidates = getCandidates;
     this.nextActionTime = 0;
   }
 
@@ -32,7 +32,7 @@ export class AutoCombat {
     let nearestTarget = null;
     let nearestDistance = ATTACK_RANGE;
 
-    for (const candidate of this.getPlayers()) {
+    for (const candidate of this.getCandidates()) {
       if (candidate === this.player || !candidate.isAlive()) {
         continue;
       }

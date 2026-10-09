@@ -1,7 +1,10 @@
+import { RANKING_VISIBLE_LIMIT } from '../config/GameConfig.js';
+
 const PANEL_WIDTH = 230;
 const PADDING = 14;
 const HEADER_HEIGHT = 34;
 const ROW_HEIGHT = 27;
+const RENDER_DELAY = 100;
 
 export class RankingView {
   constructor(scene, scoreSystem, { x, y }) {
@@ -10,11 +13,12 @@ export class RankingView {
     this.x = x;
     this.y = y;
     this.rows = [];
+    this.renderTimer = null;
 
     this.background = scene.add.graphics().setDepth(20);
 
     this.title = scene.add
-      .text(x + PADDING, y + PADDING, 'RANKING', {
+      .text(x + PADDING, y + PADDING, 'TOP 10', {
         fontFamily: 'Arial, sans-serif',
         fontSize: '20px',
         fontStyle: 'bold',
@@ -22,9 +26,7 @@ export class RankingView {
       })
       .setDepth(21);
 
-    this.unsubscribe = this.scoreSystem.subscribe((ranking) =>
-      this.render(ranking)
-    );
+    this.unsubscribe = this.scoreSystem.subscribe(() => this.scheduleRender());
   }
 
   ensureRows(count) {
@@ -47,11 +49,25 @@ export class RankingView {
     }
   }
 
-  render(ranking) {
+  scheduleRender() {
+    if (this.renderTimer) {
+      return;
+    }
+
+    this.renderTimer = this.scene.time.delayedCall(RENDER_DELAY, () => {
+      this.renderTimer = null;
+      this.render();
+    });
+  }
+
+  render() {
+    const ranking = this.scoreSystem.getRanking(RANKING_VISIBLE_LIMIT);
     this.ensureRows(ranking.length);
 
     const panelHeight =
-      PADDING * 2 + HEADER_HEIGHT + Math.max(ranking.length, 1) * ROW_HEIGHT;
+      PADDING * 2 +
+      HEADER_HEIGHT +
+      Math.max(ranking.length, 1) * ROW_HEIGHT;
 
     this.background.clear();
     this.background.fillStyle(0x0f172a, 0.88);
@@ -77,5 +93,16 @@ export class RankingView {
         entry ? `${index + 1}. ${entry.username} — ${entry.score} pts` : ''
       );
     });
+  }
+
+  destroy() {
+    this.unsubscribe?.();
+    this.unsubscribe = null;
+    this.renderTimer?.remove(false);
+    this.renderTimer = null;
+    this.background.destroy();
+    this.title.destroy();
+    this.rows.forEach((row) => row.destroy());
+    this.rows = [];
   }
 }
