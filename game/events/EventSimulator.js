@@ -1,3 +1,5 @@
+import { VFX_SCENARIOS, playVfxScenario } from "../effects/VfxScenarios.js";
+
 const SIMULATED_USERS = [
   { userId: 'sim-001', username: 'Lucas' },
   { userId: 'sim-002', username: 'Maria' },
@@ -35,6 +37,8 @@ const SCRIPTED_EVENTS = [
 const RANDOM_EVENTS = ['COMMENT', 'LIKE', 'FOLLOW', 'GIFT', 'SHARE'];
 
 export class EventSimulator {
+  static get visualScenarios() { return VFX_SCENARIOS; }
+  static playVisualScenario(name, effects, actors) { playVfxScenario(name, effects, actors); }
   constructor(eventBus) {
     this.eventBus = eventBus;
     this.timeouts = [];

@@ -18,6 +18,7 @@ import { LiveHud } from "../hud/LiveHud.js";
 import { BotManager } from "./BotManager.js";
 import { RoundManager } from "./RoundManager.js";
 import { preloadVfxAssets } from "../effects/VfxAssets.js";
+import { VfxDebugController } from "../effects/VfxDebugController.js";
 export class ArenaScene extends Phaser.Scene {
   constructor(
     options = {
@@ -138,6 +139,7 @@ export class ArenaScene extends Phaser.Scene {
       loop: true,
       callback: () => this.botManager?.update(),
     });
+    if (this.visualEffects.options.debug) this.vfxDebug = new VfxDebugController(this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.shutdown());
   }
   handleParticipantEvent(event) {
@@ -219,6 +221,7 @@ export class ArenaScene extends Phaser.Scene {
     this.roundManager.update(delta, this.activePlayerManager.entries.size);
     this.activePlayerManager.update(time, delta);
     this.visualEffects.update(time, delta);
+    this.vfxDebug?.update(delta);
     this.hud.update(this.roundManager);
     if (
       this.giftAnnouncementAt &&
@@ -230,6 +233,7 @@ export class ArenaScene extends Phaser.Scene {
     }
   }
   shutdown() {
+    this.vfxDebug?.destroy();
     this.eventSimulator?.stop();
     this.webSocketEventSource?.stop();
     this.loadRotationTimer?.remove(false);
