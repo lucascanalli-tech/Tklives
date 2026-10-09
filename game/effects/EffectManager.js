@@ -1,4 +1,4 @@
-import { getVfxOptions, VisualRandom } from "../config/VfxConfig.js";
+import { createVisualObject, getVfxOptions, VisualRandom } from "../config/VfxConfig.js";
 import { createProceduralTextures } from "./ProceduralTextures.js";
 import { readyVfxAssets } from "./VfxAssets.js";
 import { ObjectPool } from "./ObjectPool.js";
@@ -14,11 +14,11 @@ export class EffectManager {
     createProceduralTextures(scene);
     this.objects = new Set(); this.records = new Map(); this.channels = new Map();
     this.sprites = new ObjectPool(() => scene.add.sprite(0, 0, "vfx-ring").setDepth(12), options.objects);
-    this.labels = new ObjectPool(() => scene.add.text(0, 0, "", {
+    this.labels = new ObjectPool(() => createVisualObject(() => scene.add.text(0, 0, "", {
       fontFamily: "Arial, sans-serif", fontSize: "13px", fontStyle: "bold",
       color: "#e8f6ff", backgroundColor: "#081524ee", padding: { x: 8, y: 5 },
       stroke: "#081524", strokeThickness: 2, wordWrap: { width: 190 },
-    }).setOrigin(0.5).setDepth(18), options.labels);
+    }).setOrigin(0.5).setDepth(18), this.random), options.labels);
     this.particles = new ParticlePool(this); this.destroyed = false;
     this.playerStates = new Map();
     this.combat = new CombatEffects(this);

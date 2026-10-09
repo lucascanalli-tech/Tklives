@@ -20,3 +20,11 @@ export class VisualRandom {
   }
   between(min, max) { return min + (max - min) * this.next(); }
 }
+
+// Phaser Text generates a texture UUID with Math.random internally. Isolate that
+// synchronous allocation too; never hold this override across an async boundary.
+export function createVisualObject(factory, random) {
+  const gameplayRandom = Math.random;
+  try { Math.random = () => random.next(); return factory(); }
+  finally { Math.random = gameplayRandom; }
+}

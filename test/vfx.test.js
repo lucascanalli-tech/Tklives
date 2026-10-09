@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { getVfxOptions, VisualRandom } from "../game/config/VfxConfig.js";
+import { createVisualObject, getVfxOptions, VisualRandom } from "../game/config/VfxConfig.js";
 import { validateVfxManifest } from "../game/effects/VfxAssets.js";
 import { ObjectPool } from "../game/effects/ObjectPool.js";
 
@@ -14,6 +14,13 @@ test("visual quality has bounded budgets and does not consume gameplay randomnes
     const a = new VisualRandom(), b = new VisualRandom();
     for (let i = 0; i < 1000; i++) assert.equal(a.next(), b.next());
   } finally { Math.random = old; }
+});
+test("Phaser visual texture allocation restores the gameplay random source even on error", () => {
+  const original = Math.random, rng = new VisualRandom();
+  createVisualObject(() => { assert.notEqual(Math.random, original); Math.random(); }, rng);
+  assert.equal(Math.random, original);
+  assert.throws(() => createVisualObject(() => { throw new Error("factory failed"); }, rng));
+  assert.equal(Math.random, original);
 });
 test("manifest restricts paths, roles, frame sizes and duplicate assets", () => {
   const good = { role: "hit", type: "spritesheet", path: "assets/vfx/combat/hit/spark.png", frameWidth: 64, frameHeight: 64 };
