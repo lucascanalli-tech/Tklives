@@ -4,41 +4,25 @@ Jogo 2D automático para TikTok LIVE.
 
 ## Versão atual
 
-**v0.08 — Efeitos das interações (aguardando validação no computador)**
+**v0.09 — TikTok + backend (aguardando validação no computador e LIVE real)**
 
-A v0.07 — Simulador de eventos foi aprovada no computador real. Esta versão mantém o mesmo contrato interno de eventos e adiciona efeitos visuais temporários para `COMMENT`, `LIKE`, `FOLLOW`, `GIFT` e `SHARE`.
+A v0.08 — Efeitos das interações foi aprovada no computador real. Esta etapa adiciona uma camada separada de backend capaz de receber eventos reais do TikTok LIVE, normalizá-los e encaminhá-los por WebSocket para o mesmo `EventBus` já usado pelo simulador.
 
-Os efeitos são somente visuais. Eles não alteram dano, vida, pontuação ou outros atributos do personagem.
+O jogo continua sem depender diretamente da biblioteca TikTok. O `EventSimulator` permanece disponível para testes locais.
 
-Eventos de usuários que ainda não possuem personagem são ignorados pelos efeitos sem causar erro. O evento `JOIN` continua responsável por criar o personagem apenas quando o `userId` ainda não existe.
+## Fluxo da v0.09
 
-Ainda não existe conexão real com TikTok, WebSocket externo, banco de dados, rodadas, bônus permanentes, classes ou economia.
-
-## Efeitos da v0.08
-
-- `COMMENT`: mostra temporariamente a mensagem próxima ao personagem;
-- `LIKE`: mostra um coração com a quantidade de likes;
-- `FOLLOW`: mostra um destaque verde e a mensagem `NOVO FOLLOW`;
-- `GIFT`: mostra um efeito mais destacado com nome e quantidade do presente;
-- `SHARE`: mostra ondas azuis e a indicação `SHARE`;
-- `JOIN`: mantém somente a criação do personagem, sem efeito adicional.
-
-Todos os efeitos desaparecem automaticamente.
-
-## Contrato interno de eventos
-
-Todo evento publicado pelo jogo possui pelo menos:
-
-```js
-{
-  type: 'JOIN',
-  userId: 'sim-001',
-  username: '@Lucas',
-  timestamp: 0
-}
+```text
+TikTok LIVE
+  -> TikTokConnector
+  -> TikTokEventMapper
+  -> WebSocket
+  -> WebSocketEventSource
+  -> EventBus
+  -> Live Arena
 ```
 
-Tipos suportados:
+Eventos internos suportados:
 
 - `JOIN`
 - `COMMENT`
@@ -47,19 +31,41 @@ Tipos suportados:
 - `GIFT`
 - `SHARE`
 
-Eventos podem incluir dados adicionais, como `message`, `count`, `giftName` e `quantity`.
+Exemplo:
+
+```js
+{
+  type: 'COMMENT',
+  userId: '123',
+  username: '@usuario',
+  timestamp: 0,
+  message: 'Olá'
+}
+```
+
+A primeira interação recebida de um usuário também gera um `JOIN` local antes do evento original quando necessário. Assim, um comentário, like, follow, gift ou share pode criar o personagem mesmo se o evento de entrada da LIVE não chegar.
+
+Gifts em sequência são enviados ao jogo apenas quando a sequência termina, evitando processar várias vezes o mesmo presente enquanto o contador ainda está aumentando.
 
 ## Requisitos
 
-- Node.js 18 ou superior
+- Node.js 20 ou superior
 - npm
 
-## Executar localmente
+## Teste local com simulador
 
 ```bash
 npm install
 npm start
 ```
+
+Abra:
+
+```text
+http://localhost:8080
+```
+
+O simulador continua ligado por padrão e deve se comportar como na v0.08.
 
 No Windows PowerShell, se o `npm.ps1` estiver bloqueado, use:
 
@@ -68,26 +74,53 @@ npm.cmd install
 npm.cmd start
 ```
 
-Abra no navegador:
+## Preparar teste com TikTok LIVE real
 
-```text
-http://localhost:8080
+1. Copie `.env.example` para um novo arquivo chamado `.env`.
+2. Troque `@seu_usuario` pelo @ da conta que estará em LIVE.
+3. Inicie a LIVE no TikTok.
+4. No terminal, execute:
+
+```bash
+npm run start:live
 ```
 
-## Resultado esperado da v0.08
+No Windows PowerShell, se necessário:
 
-Ao abrir a página:
+```powershell
+npm.cmd run start:live
+```
 
-- o título deve mostrar `LIVE ARENA • v0.08`;
-- usuários simulados devem continuar entrando por `JOIN` sem duplicidade;
-- o painel de eventos deve continuar funcionando;
-- `COMMENT` deve exibir a mensagem temporariamente próxima ao personagem;
-- `LIKE` deve exibir um coração e a quantidade de likes;
-- `FOLLOW` deve destacar o personagem temporariamente;
-- `GIFT` deve gerar o efeito visual mais destacado e mostrar nome/quantidade;
-- `SHARE` deve gerar ondas visuais azuis;
-- todos os efeitos devem desaparecer automaticamente;
-- movimento, combate, vida, morte, respawn, pontuação e ranking devem continuar funcionando;
-- nenhum efeito deve alterar dano, vida ou pontuação.
+5. Abra o jogo com o simulador desligado:
+
+```text
+http://localhost:8080/?simulator=off
+```
+
+Resultado esperado no terminal:
+
+```text
+[SERVER] Live Arena em http://localhost:8080
+[WS] WebSocket em ws://localhost:8080/events
+[TIKTOK] Conectando a @seu_usuario...
+[TIKTOK] Conectado à sala ...
+[WS] Jogo conectado.
+```
+
+Quando uma interação real chegar, o terminal deverá mostrar algo como:
+
+```text
+[EVENT] COMMENT @usuario -> 1 cliente(s)
+```
+
+No jogo, o usuário deverá aparecer automaticamente e o comentário/gift/etc. deverá gerar o efeito já existente.
+
+## Segurança
+
+Nunca coloque cookies, tokens, senhas ou credenciais no código. O arquivo `.env` está ignorado pelo Git e `.env.example` não contém informações privadas.
+
+## Observação sobre a conexão TikTok
+
+A v0.09 usa `tiktok-live-connector` somente dentro de `server/tiktok/TikTokConnector.js`. A biblioteca é não oficial e baseada no serviço interno de Webcast do TikTok, então mudanças do TikTok podem exigir troca ou atualização do conector no futuro. Essa troca não deve exigir mudanças na lógica do jogo.
 
 Para encerrar o servidor, pressione `Ctrl+C` no terminal.

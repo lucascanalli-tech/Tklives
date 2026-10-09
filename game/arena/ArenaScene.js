@@ -3,6 +3,7 @@ import { InteractionEffects } from '../effects/InteractionEffects.js';
 import { EventBus } from '../events/EventBus.js';
 import { EventLogView } from '../events/EventLogView.js';
 import { EventSimulator } from '../events/EventSimulator.js';
+import { WebSocketEventSource } from '../events/WebSocketEventSource.js';
 import { HealthSystem } from '../health/HealthSystem.js';
 import { AutoMovement } from '../movement/AutoMovement.js';
 import { Player } from '../player/Player.js';
@@ -48,7 +49,7 @@ export class ArenaScene extends Phaser.Scene {
     this.drawArena();
 
     this.add
-      .text(width / 2, 26, 'LIVE ARENA • v0.08', {
+      .text(width / 2, 26, 'LIVE ARENA • v0.09', {
         fontFamily: 'Arial, sans-serif',
         fontSize: '22px',
         fontStyle: 'bold',
@@ -78,11 +79,21 @@ export class ArenaScene extends Phaser.Scene {
       (userId) => this.playersByUserId.get(userId)
     );
 
+    this.webSocketEventSource = new WebSocketEventSource(this.eventBus);
+    this.webSocketEventSource.start();
+
+    const simulatorEnabled =
+      new URLSearchParams(window.location.search).get('simulator') !== 'off';
+
     this.eventSimulator = new EventSimulator(this.eventBus);
-    this.eventSimulator.start();
+
+    if (simulatorEnabled) {
+      this.eventSimulator.start();
+    }
 
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.eventSimulator.stop();
+      this.webSocketEventSource.stop();
       this.unsubscribeJoin?.();
       this.interactionEffects.destroy();
       this.eventLogView.unsubscribe?.();
