@@ -17,6 +17,7 @@ import { ScoreSystem } from "../score/ScoreSystem.js";
 import { LiveHud } from "../hud/LiveHud.js";
 import { BotManager } from "./BotManager.js";
 import { RoundManager } from "./RoundManager.js";
+import { preloadVfxAssets } from "../effects/VfxAssets.js";
 export class ArenaScene extends Phaser.Scene {
   constructor(
     options = {
@@ -29,6 +30,9 @@ export class ArenaScene extends Phaser.Scene {
   ) {
     super("ArenaScene");
     this.options = options;
+  }
+  preload() {
+    preloadVfxAssets(this);
   }
   create() {
     const { width, height } = this.scale;
@@ -214,6 +218,7 @@ export class ArenaScene extends Phaser.Scene {
     if (!this.roundManager) return;
     this.roundManager.update(delta, this.activePlayerManager.entries.size);
     this.activePlayerManager.update(time, delta);
+    this.visualEffects.update(time, delta);
     this.hud.update(this.roundManager);
     if (
       this.giftAnnouncementAt &&

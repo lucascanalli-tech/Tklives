@@ -46,12 +46,19 @@ test(
     }
     assert.ok(ready, logs);
     assert.match(await (await fetch(base)).text(), /Live Arena/);
+    const manifest = await fetch(base + "/assets/vfx/manifest.json");
+    assert.equal(manifest.status, 200);
+    assert.match(manifest.headers.get("content-type"), /application\/json/);
+    assert.ok(Array.isArray((await manifest.json()).assets));
     for (const path of [
       "/.env",
       "/.git/config",
       "/server/server.js",
       "/package.json",
       "/game/%2e%2e%2fserver/server.js",
+      "/assets/vfx/../../package.json",
+      "/assets/vfx/%2e%2e%2f%2e%2e%2fserver/server.js",
+      "/assets/vfx/private.env",
     ]) {
       assert.equal((await fetch(base + path)).status, 404, path);
     }

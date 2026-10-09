@@ -26,6 +26,9 @@ const types = {
   ".css": "text/css; charset=utf-8",
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".png": "image/png",
+  ".webp": "image/webp",
 };
 const httpServer = createServer(async (request, response) => {
   response.setHeader("X-Content-Type-Options", "nosniff");
@@ -51,6 +54,7 @@ const httpServer = createServer(async (request, response) => {
       pathname === "/index.html" ||
       pathname === "/style.css" ||
       /^\/game\/[\w/.-]+\.js$/.test(pathname) ||
+      /^\/assets\/vfx\/[\w/-]+\.(png|webp|json)$/.test(pathname) ||
       pathname === "/node_modules/phaser/dist/phaser.min.js";
     if (
       !allowed ||
@@ -62,6 +66,11 @@ const httpServer = createServer(async (request, response) => {
     );
     if (!file.startsWith(projectRoot + sep))
       throw new Error("Outside public root");
+    if (pathname.startsWith("/assets/vfx/")) {
+      const publicVfxRoot = await realpath(resolve(projectRoot, "assets/vfx"));
+      if (!publicVfxRoot.startsWith(projectRoot + sep) || !file.startsWith(publicVfxRoot + sep))
+        throw new Error("Outside VFX asset root");
+    }
     const content = await readFile(file);
     response.writeHead(200, {
       "Content-Type": types[extname(file)] ?? "application/octet-stream",
