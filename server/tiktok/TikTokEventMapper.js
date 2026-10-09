@@ -1,75 +1,28 @@
-function normalizeUsername(username) {
-  const value = String(username ?? '').trim();
-
-  if (!value) {
-    return '';
-  }
-
-  return value.startsWith('@') ? value : `@${value}`;
-}
-
-function getUser(data) {
-  const user = data?.user ?? {};
-  const username = normalizeUsername(
-    user.uniqueId ?? data?.uniqueId ?? user.nickname
-  );
-  const userId = String(
-    user.userId ?? user.id ?? user.secUid ?? user.uniqueId ?? ''
-  ).trim();
-
-  if (!userId || !username) {
-    return null;
-  }
-
-  return { userId, username };
-}
-
-export function mapTikTokEvent(type, data) {
-  const user = getUser(data);
-
-  if (!user) {
-    return null;
-  }
-
-  const baseEvent = {
+import { normalizeInternalEvent } from "../../game/events/InternalEvent.js";
+export function mapTikTokEvent(type, raw) {
+  const user = raw?.user ?? {};
+  // A mutable username must never serve as an identity fallback.
+  const userId = user.userId ?? user.id ?? user.secUid ?? raw?.userId;
+  const username = user.uniqueId ?? raw?.uniqueId ?? user.nickname;
+  const gift = raw?.giftDetails ?? {};
+  const extended = raw?.extendedGiftInfo ?? {};
+  return normalizeInternalEvent({
     type,
-    userId: user.userId,
-    username: user.username,
-    timestamp: Date.now()
-  };
-
-  switch (type) {
-    case 'JOIN':
-    case 'FOLLOW':
-    case 'SHARE':
-      return baseEvent;
-
-    case 'COMMENT': {
-      const message = String(data?.comment ?? '').trim();
-      return message ? { ...baseEvent, message } : null;
-    }
-
-    case 'LIKE':
-      return {
-        ...baseEvent,
-        count: Math.max(1, Number(data?.likeCount) || 1)
-      };
-
-    case 'GIFT': {
-      const giftName = String(
-        data?.giftDetails?.giftName ??
-          data?.extendedGiftInfo?.name ??
-          `Gift ${data?.giftId ?? ''}`
-      ).trim();
-
-      return {
-        ...baseEvent,
-        giftName: giftName || 'Gift',
-        quantity: Math.max(1, Number(data?.repeatCount) || 1)
-      };
-    }
-
-    default:
-      return null;
-  }
+    userId,
+    username,
+    timestamp: Date.now(),
+    eventId: raw?.common?.msgId ?? raw?.msgId,
+    data: {
+      message: raw?.comment,
+      count: raw?.likeCount,
+      giftId: raw?.giftId ?? gift.giftId,
+      giftName: gift.giftName ?? extended.name,
+      quantity: raw?.repeatCount,
+      repeatCount: raw?.repeatCount,
+      repeatEnd: raw?.repeatEnd,
+      giftType: gift.giftType ?? raw?.giftType,
+      groupId: raw?.groupId,
+      diamondCount: gift.diamondCount ?? extended.diamondCount,
+    },
+  });
 }

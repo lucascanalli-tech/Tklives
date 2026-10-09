@@ -1,16 +1,18 @@
 {
   "name": "live-arena",
-  "version": "0.0.9",
+  "version": "0.9.0",
   "private": true,
   "type": "module",
   "description": "Live Arena - jogo 2D automatico para TikTok LIVE",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=20.19.0"
   },
   "scripts": {
     "start": "node server/server.js",
     "start:ws-test": "node server/server.js --ws-test",
-    "start:live": "node --env-file=.env server/server.js"
+    "start:live": "node --env-file-if-exists=.env server/server.js",
+    "test": "node --test test/*.test.js",
+    "test:browser": "python test/browser.py"
   },
   "dependencies": {
     "phaser": "3.90.0",
