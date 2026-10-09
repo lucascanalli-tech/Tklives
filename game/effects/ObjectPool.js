@@ -16,7 +16,9 @@ export class ObjectPool {
   }
   release(object) {
     if (!this.active.delete(object)) return;
-    object.stop?.(); object.setActive(false).setVisible(false); this.free.push(object);
+    // DisplayList may already have destroyed a Sprite's AnimationState on shutdown.
+    if (object.anims) object.stop?.();
+    object.setActive(false).setVisible(false); this.free.push(object);
   }
   metrics() { return { active: this.active.size, allocated: this.all.size, capacity: this.capacity, peak: this.peak, dropped: this.dropped }; }
   destroy() {

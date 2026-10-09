@@ -43,7 +43,8 @@ export class ScreenEffects {
   }
   stop() {
     this.duration = 0; this.flash.setAlpha(0); this.banner.setVisible(false);
-    this.manager.scene.cameras.main.setScroll(0, 0);
+    // Phaser shuts down CameraManager before the scene's shutdown callback.
+    this.manager.scene.cameras.main?.setScroll(0, 0);
   }
   destroy() {
     this.stop(); this.border.destroy(); this.flash.destroy(); this.banner.destroy();
