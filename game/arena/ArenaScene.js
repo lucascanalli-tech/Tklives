@@ -1,4 +1,5 @@
 import { AutoCombat } from '../combat/AutoCombat.js';
+import { InteractionEffects } from '../effects/InteractionEffects.js';
 import { EventBus } from '../events/EventBus.js';
 import { EventLogView } from '../events/EventLogView.js';
 import { EventSimulator } from '../events/EventSimulator.js';
@@ -47,7 +48,7 @@ export class ArenaScene extends Phaser.Scene {
     this.drawArena();
 
     this.add
-      .text(width / 2, 26, 'LIVE ARENA • v0.07', {
+      .text(width / 2, 26, 'LIVE ARENA • v0.08', {
         fontFamily: 'Arial, sans-serif',
         fontSize: '22px',
         fontStyle: 'bold',
@@ -71,12 +72,19 @@ export class ArenaScene extends Phaser.Scene {
       this.addPlayerFromJoin(event)
     );
 
+    this.interactionEffects = new InteractionEffects(
+      this,
+      this.eventBus,
+      (userId) => this.playersByUserId.get(userId)
+    );
+
     this.eventSimulator = new EventSimulator(this.eventBus);
     this.eventSimulator.start();
 
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.eventSimulator.stop();
       this.unsubscribeJoin?.();
+      this.interactionEffects.destroy();
       this.eventLogView.unsubscribe?.();
     });
   }

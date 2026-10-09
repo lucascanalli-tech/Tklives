@@ -4,15 +4,26 @@ Jogo 2D automático para TikTok LIVE.
 
 ## Versão atual
 
-**v0.07 — Simulador de eventos (aguardando validação no computador)**
+**v0.08 — Efeitos das interações (aguardando validação no computador)**
 
-A v0.06 — Pontuação e ranking foi aprovada no computador real. Esta versão adiciona uma camada interna padronizada de eventos e um simulador local capaz de gerar `JOIN`, `COMMENT`, `LIKE`, `FOLLOW`, `GIFT` e `SHARE` sem conexão com o TikTok.
+A v0.07 — Simulador de eventos foi aprovada no computador real. Esta versão mantém o mesmo contrato interno de eventos e adiciona efeitos visuais temporários para `COMMENT`, `LIKE`, `FOLLOW`, `GIFT` e `SHARE`.
 
-Eventos `JOIN` criam personagens automaticamente quando o `userId` ainda não existe. Um `JOIN` repetido do mesmo usuário não cria personagem duplicado. Os personagens criados entram normalmente em movimento, combate, vida, morte, respawn, pontuação e ranking.
+Os efeitos são somente visuais. Eles não alteram dano, vida, pontuação ou outros atributos do personagem.
 
-A tela também exibe um painel simples com os eventos simulados recebidos em tempo real.
+Eventos de usuários que ainda não possuem personagem são ignorados pelos efeitos sem causar erro. O evento `JOIN` continua responsável por criar o personagem apenas quando o `userId` ainda não existe.
 
-Ainda não existe conexão real com TikTok, autenticação TikTok, WebSocket externo, banco de dados, rodadas ou efeitos especiais de gifts/likes/comentários.
+Ainda não existe conexão real com TikTok, WebSocket externo, banco de dados, rodadas, bônus permanentes, classes ou economia.
+
+## Efeitos da v0.08
+
+- `COMMENT`: mostra temporariamente a mensagem próxima ao personagem;
+- `LIKE`: mostra um coração com a quantidade de likes;
+- `FOLLOW`: mostra um destaque verde e a mensagem `NOVO FOLLOW`;
+- `GIFT`: mostra um efeito mais destacado com nome e quantidade do presente;
+- `SHARE`: mostra ondas azuis e a indicação `SHARE`;
+- `JOIN`: mantém somente a criação do personagem, sem efeito adicional.
+
+Todos os efeitos desaparecem automaticamente.
 
 ## Contrato interno de eventos
 
@@ -63,18 +74,20 @@ Abra no navegador:
 http://localhost:8080
 ```
 
-## Resultado esperado da v0.07
+## Resultado esperado da v0.08
 
 Ao abrir a página:
 
-- o título deve mostrar `LIVE ARENA • v0.07`;
-- o painel `EVENTOS • SIMULADOR` deve começar a receber eventos automaticamente;
-- usuários simulados devem entrar gradualmente por eventos `JOIN`;
-- cada usuário deve criar apenas um personagem;
-- até seis personagens simulados devem aparecer com `@nome`;
-- personagens devem se movimentar, atacar, perder vida, morrer, reaparecer e pontuar normalmente;
-- o ranking deve aceitar jogadores adicionados durante a execução e atualizar automaticamente;
-- devem aparecer eventos `COMMENT`, `LIKE`, `FOLLOW`, `GIFT` e `SHARE` no painel;
-- um `JOIN` repetido de um usuário já existente não deve criar personagem duplicado.
+- o título deve mostrar `LIVE ARENA • v0.08`;
+- usuários simulados devem continuar entrando por `JOIN` sem duplicidade;
+- o painel de eventos deve continuar funcionando;
+- `COMMENT` deve exibir a mensagem temporariamente próxima ao personagem;
+- `LIKE` deve exibir um coração e a quantidade de likes;
+- `FOLLOW` deve destacar o personagem temporariamente;
+- `GIFT` deve gerar o efeito visual mais destacado e mostrar nome/quantidade;
+- `SHARE` deve gerar ondas visuais azuis;
+- todos os efeitos devem desaparecer automaticamente;
+- movimento, combate, vida, morte, respawn, pontuação e ranking devem continuar funcionando;
+- nenhum efeito deve alterar dano, vida ou pontuação.
 
 Para encerrar o servidor, pressione `Ctrl+C` no terminal.
