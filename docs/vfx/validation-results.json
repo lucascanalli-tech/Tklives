@@ -1,0 +1,973 @@
+{
+  "renderer": "Chromium Canvas headless",
+  "regression": [
+    "LOW",
+    "MEDIUM",
+    "HIGH"
+  ],
+  "performance": [
+    {
+      "fps": 60,
+      "p95ms": 16.7,
+      "children": 402,
+      "effects": 46,
+      "tweens": 0,
+      "timers": 5,
+      "metrics": {
+        "quality": "MEDIUM",
+        "effects": 46,
+        "limit": 100,
+        "sprites": {
+          "active": 32,
+          "allocated": 86,
+          "capacity": 100,
+          "peak": 86,
+          "dropped": 0
+        },
+        "labels": {
+          "active": 14,
+          "allocated": 14,
+          "capacity": 14,
+          "peak": 14,
+          "dropped": 72
+        },
+        "particles": {
+          "active": 171,
+          "allocated": 224,
+          "capacity": 224,
+          "peak": 224,
+          "dropped": 27
+        },
+        "visualTimers": 0,
+        "visualTweens": 0,
+        "playerStates": 0,
+        "presentations": {
+          "active": 1,
+          "pending": 8,
+          "capacity": 8,
+          "dropped": 9
+        },
+        "ambient": 8,
+        "channels": 14,
+        "loadedAssets": 0
+      },
+      "active": 10
+    },
+    {
+      "fps": 59.8,
+      "p95ms": 16.7,
+      "children": 475,
+      "effects": 66,
+      "tweens": 3,
+      "timers": 14,
+      "metrics": {
+        "quality": "MEDIUM",
+        "effects": 66,
+        "limit": 100,
+        "sprites": {
+          "active": 52,
+          "allocated": 99,
+          "capacity": 100,
+          "peak": 99,
+          "dropped": 0
+        },
+        "labels": {
+          "active": 14,
+          "allocated": 14,
+          "capacity": 14,
+          "peak": 14,
+          "dropped": 176
+        },
+        "particles": {
+          "active": 192,
+          "allocated": 224,
+          "capacity": 224,
+          "peak": 224,
+          "dropped": 422
+        },
+        "visualTimers": 0,
+        "visualTweens": 0,
+        "playerStates": 0,
+        "presentations": {
+          "active": 1,
+          "pending": 8,
+          "capacity": 8,
+          "dropped": 9
+        },
+        "ambient": 8,
+        "channels": 14,
+        "loadedAssets": 0
+      },
+      "active": 25
+    },
+    {
+      "fps": 59.8,
+      "p95ms": 16.7,
+      "children": 535,
+      "effects": 67,
+      "tweens": 0,
+      "timers": 17,
+      "metrics": {
+        "quality": "MEDIUM",
+        "effects": 67,
+        "limit": 100,
+        "sprites": {
+          "active": 53,
+          "allocated": 99,
+          "capacity": 100,
+          "peak": 99,
+          "dropped": 0
+        },
+        "labels": {
+          "active": 14,
+          "allocated": 14,
+          "capacity": 14,
+          "peak": 14,
+          "dropped": 295
+        },
+        "particles": {
+          "active": 205,
+          "allocated": 224,
+          "capacity": 224,
+          "peak": 224,
+          "dropped": 848
+        },
+        "visualTimers": 0,
+        "visualTweens": 0,
+        "playerStates": 1,
+        "presentations": {
+          "active": 1,
+          "pending": 8,
+          "capacity": 8,
+          "dropped": 9
+        },
+        "ambient": 8,
+        "channels": 14,
+        "loadedAssets": 0
+      },
+      "active": 40
+    }
+  ],
+  "stress": [
+    {
+      "active": 10,
+      "before": {
+        "children": 402,
+        "timers": 5,
+        "tweens": 0,
+        "metrics": {
+          "quality": "MEDIUM",
+          "effects": 46,
+          "limit": 100,
+          "sprites": {
+            "active": 32,
+            "allocated": 86,
+            "capacity": 100,
+            "peak": 86,
+            "dropped": 0
+          },
+          "labels": {
+            "active": 14,
+            "allocated": 14,
+            "capacity": 14,
+            "peak": 14,
+            "dropped": 72
+          },
+          "particles": {
+            "active": 171,
+            "allocated": 224,
+            "capacity": 224,
+            "peak": 224,
+            "dropped": 27
+          },
+          "visualTimers": 0,
+          "visualTweens": 0,
+          "playerStates": 0,
+          "presentations": {
+            "active": 1,
+            "pending": 8,
+            "capacity": 8,
+            "dropped": 9
+          },
+          "ambient": 8,
+          "channels": 14,
+          "loadedAssets": 0
+        }
+      },
+      "samples": [
+        {
+          "children": 402,
+          "timers": 5,
+          "tweens": 0,
+          "metrics": {
+            "quality": "MEDIUM",
+            "effects": 16,
+            "limit": 100,
+            "sprites": {
+              "active": 9,
+              "allocated": 86,
+              "capacity": 100,
+              "peak": 86,
+              "dropped": 0
+            },
+            "labels": {
+              "active": 7,
+              "allocated": 14,
+              "capacity": 14,
+              "peak": 14,
+              "dropped": 579
+            },
+            "particles": {
+              "active": 0,
+              "allocated": 224,
+              "capacity": 224,
+              "peak": 224,
+              "dropped": 985
+            },
+            "visualTimers": 0,
+            "visualTweens": 0,
+            "playerStates": 0,
+            "presentations": {
+              "active": 1,
+              "pending": 5,
+              "capacity": 8,
+              "dropped": 37
+            },
+            "ambient": 8,
+            "channels": 7,
+            "loadedAssets": 0
+          }
+        },
+        {
+          "children": 402,
+          "timers": 5,
+          "tweens": 0,
+          "metrics": {
+            "quality": "MEDIUM",
+            "effects": 16,
+            "limit": 100,
+            "sprites": {
+              "active": 9,
+              "allocated": 86,
+              "capacity": 100,
+              "peak": 86,
+              "dropped": 0
+            },
+            "labels": {
+              "active": 7,
+              "allocated": 14,
+              "capacity": 14,
+              "peak": 14,
+              "dropped": 1059
+            },
+            "particles": {
+              "active": 0,
+              "allocated": 224,
+              "capacity": 224,
+              "peak": 224,
+              "dropped": 1895
+            },
+            "visualTimers": 0,
+            "visualTweens": 0,
+            "playerStates": 0,
+            "presentations": {
+              "active": 1,
+              "pending": 6,
+              "capacity": 8,
+              "dropped": 61
+            },
+            "ambient": 8,
+            "channels": 7,
+            "loadedAssets": 0
+          }
+        },
+        {
+          "children": 402,
+          "timers": 5,
+          "tweens": 0,
+          "metrics": {
+            "quality": "MEDIUM",
+            "effects": 16,
+            "limit": 100,
+            "sprites": {
+              "active": 9,
+              "allocated": 86,
+              "capacity": 100,
+              "peak": 86,
+              "dropped": 0
+            },
+            "labels": {
+              "active": 7,
+              "allocated": 14,
+              "capacity": 14,
+              "peak": 14,
+              "dropped": 2019
+            },
+            "particles": {
+              "active": 0,
+              "allocated": 224,
+              "capacity": 224,
+              "peak": 224,
+              "dropped": 3715
+            },
+            "visualTimers": 0,
+            "visualTweens": 0,
+            "playerStates": 0,
+            "presentations": {
+              "active": 1,
+              "pending": 6,
+              "capacity": 8,
+              "dropped": 111
+            },
+            "ambient": 8,
+            "channels": 7,
+            "loadedAssets": 0
+          }
+        }
+      ],
+      "drained": {
+        "children": 402,
+        "timers": 5,
+        "tweens": 0,
+        "metrics": {
+          "quality": "MEDIUM",
+          "effects": 0,
+          "limit": 100,
+          "sprites": {
+            "active": 0,
+            "allocated": 86,
+            "capacity": 100,
+            "peak": 86,
+            "dropped": 0
+          },
+          "labels": {
+            "active": 0,
+            "allocated": 14,
+            "capacity": 14,
+            "peak": 14,
+            "dropped": 2019
+          },
+          "particles": {
+            "active": 0,
+            "allocated": 224,
+            "capacity": 224,
+            "peak": 224,
+            "dropped": 3715
+          },
+          "visualTimers": 0,
+          "visualTweens": 0,
+          "playerStates": 0,
+          "presentations": {
+            "active": 0,
+            "pending": 0,
+            "capacity": 8,
+            "dropped": 117
+          },
+          "ambient": 8,
+          "channels": 0,
+          "loadedAssets": 0
+        }
+      },
+      "destroyed": {
+        "quality": "MEDIUM",
+        "effects": 0,
+        "limit": 100,
+        "sprites": {
+          "active": 0,
+          "allocated": 0,
+          "capacity": 100,
+          "peak": 86,
+          "dropped": 0
+        },
+        "labels": {
+          "active": 0,
+          "allocated": 0,
+          "capacity": 14,
+          "peak": 14,
+          "dropped": 2019
+        },
+        "particles": {
+          "active": 0,
+          "allocated": 0,
+          "capacity": 224,
+          "peak": 224,
+          "dropped": 3715
+        },
+        "visualTimers": 0,
+        "visualTweens": 0,
+        "playerStates": 0,
+        "presentations": {
+          "active": 0,
+          "pending": 0,
+          "capacity": 8,
+          "dropped": 117
+        },
+        "ambient": 0,
+        "channels": 0,
+        "loadedAssets": 0
+      }
+    },
+    {
+      "active": 25,
+      "before": {
+        "children": 475,
+        "timers": 13,
+        "tweens": 3,
+        "metrics": {
+          "quality": "MEDIUM",
+          "effects": 63,
+          "limit": 100,
+          "sprites": {
+            "active": 49,
+            "allocated": 99,
+            "capacity": 100,
+            "peak": 99,
+            "dropped": 0
+          },
+          "labels": {
+            "active": 14,
+            "allocated": 14,
+            "capacity": 14,
+            "peak": 14,
+            "dropped": 177
+          },
+          "particles": {
+            "active": 178,
+            "allocated": 224,
+            "capacity": 224,
+            "peak": 224,
+            "dropped": 422
+          },
+          "visualTimers": 0,
+          "visualTweens": 0,
+          "playerStates": 2,
+          "presentations": {
+            "active": 1,
+            "pending": 8,
+            "capacity": 8,
+            "dropped": 9
+          },
+          "ambient": 8,
+          "channels": 14,
+          "loadedAssets": 0
+        }
+      },
+      "samples": [
+        {
+          "children": 475,
+          "timers": 13,
+          "tweens": 3,
+          "metrics": {
+            "quality": "MEDIUM",
+            "effects": 9,
+            "limit": 100,
+            "sprites": {
+              "active": 9,
+              "allocated": 99,
+              "capacity": 100,
+              "peak": 99,
+              "dropped": 0
+            },
+            "labels": {
+              "active": 0,
+              "allocated": 14,
+              "capacity": 14,
+              "peak": 14,
+              "dropped": 972
+            },
+            "particles": {
+              "active": 0,
+              "allocated": 224,
+              "capacity": 224,
+              "peak": 224,
+              "dropped": 1980
+            },
+            "visualTimers": 0,
+            "visualTweens": 0,
+            "playerStates": 0,
+            "presentations": {
+              "active": 1,
+              "pending": 5,
+              "capacity": 8,
+              "dropped": 37
+            },
+            "ambient": 8,
+            "channels": 0,
+            "loadedAssets": 0
+          }
+        },
+        {
+          "children": 475,
+          "timers": 13,
+          "tweens": 3,
+          "metrics": {
+            "quality": "MEDIUM",
+            "effects": 9,
+            "limit": 100,
+            "sprites": {
+              "active": 9,
+              "allocated": 99,
+              "capacity": 100,
+              "peak": 99,
+              "dropped": 0
+            },
+            "labels": {
+              "active": 0,
+              "allocated": 14,
+              "capacity": 14,
+              "peak": 14,
+              "dropped": 1762
+            },
+            "particles": {
+              "active": 0,
+              "allocated": 224,
+              "capacity": 224,
+              "peak": 224,
+              "dropped": 3490
+            },
+            "visualTimers": 0,
+            "visualTweens": 0,
+            "playerStates": 0,
+            "presentations": {
+              "active": 1,
+              "pending": 6,
+              "capacity": 8,
+              "dropped": 61
+            },
+            "ambient": 8,
+            "channels": 0,
+            "loadedAssets": 0
+          }
+        },
+        {
+          "children": 475,
+          "timers": 13,
+          "tweens": 3,
+          "metrics": {
+            "quality": "MEDIUM",
+            "effects": 9,
+            "limit": 100,
+            "sprites": {
+              "active": 9,
+              "allocated": 99,
+              "capacity": 100,
+              "peak": 99,
+              "dropped": 0
+            },
+            "labels": {
+              "active": 0,
+              "allocated": 14,
+              "capacity": 14,
+              "peak": 14,
+              "dropped": 3342
+            },
+            "particles": {
+              "active": 0,
+              "allocated": 224,
+              "capacity": 224,
+              "peak": 224,
+              "dropped": 6510
+            },
+            "visualTimers": 0,
+            "visualTweens": 0,
+            "playerStates": 0,
+            "presentations": {
+              "active": 1,
+              "pending": 6,
+              "capacity": 8,
+              "dropped": 111
+            },
+            "ambient": 8,
+            "channels": 0,
+            "loadedAssets": 0
+          }
+        }
+      ],
+      "drained": {
+        "children": 475,
+        "timers": 13,
+        "tweens": 3,
+        "metrics": {
+          "quality": "MEDIUM",
+          "effects": 0,
+          "limit": 100,
+          "sprites": {
+            "active": 0,
+            "allocated": 99,
+            "capacity": 100,
+            "peak": 99,
+            "dropped": 0
+          },
+          "labels": {
+            "active": 0,
+            "allocated": 14,
+            "capacity": 14,
+            "peak": 14,
+            "dropped": 3342
+          },
+          "particles": {
+            "active": 0,
+            "allocated": 224,
+            "capacity": 224,
+            "peak": 224,
+            "dropped": 6510
+          },
+          "visualTimers": 0,
+          "visualTweens": 0,
+          "playerStates": 0,
+          "presentations": {
+            "active": 0,
+            "pending": 0,
+            "capacity": 8,
+            "dropped": 117
+          },
+          "ambient": 8,
+          "channels": 0,
+          "loadedAssets": 0
+        }
+      },
+      "destroyed": {
+        "quality": "MEDIUM",
+        "effects": 0,
+        "limit": 100,
+        "sprites": {
+          "active": 0,
+          "allocated": 0,
+          "capacity": 100,
+          "peak": 99,
+          "dropped": 0
+        },
+        "labels": {
+          "active": 0,
+          "allocated": 0,
+          "capacity": 14,
+          "peak": 14,
+          "dropped": 3342
+        },
+        "particles": {
+          "active": 0,
+          "allocated": 0,
+          "capacity": 224,
+          "peak": 224,
+          "dropped": 6510
+        },
+        "visualTimers": 0,
+        "visualTweens": 0,
+        "playerStates": 0,
+        "presentations": {
+          "active": 0,
+          "pending": 0,
+          "capacity": 8,
+          "dropped": 117
+        },
+        "ambient": 0,
+        "channels": 0,
+        "loadedAssets": 0
+      }
+    },
+    {
+      "active": 40,
+      "before": {
+        "children": 535,
+        "timers": 17,
+        "tweens": 0,
+        "metrics": {
+          "quality": "MEDIUM",
+          "effects": 67,
+          "limit": 100,
+          "sprites": {
+            "active": 53,
+            "allocated": 99,
+            "capacity": 100,
+            "peak": 99,
+            "dropped": 0
+          },
+          "labels": {
+            "active": 14,
+            "allocated": 14,
+            "capacity": 14,
+            "peak": 14,
+            "dropped": 295
+          },
+          "particles": {
+            "active": 205,
+            "allocated": 224,
+            "capacity": 224,
+            "peak": 224,
+            "dropped": 848
+          },
+          "visualTimers": 0,
+          "visualTweens": 0,
+          "playerStates": 1,
+          "presentations": {
+            "active": 1,
+            "pending": 8,
+            "capacity": 8,
+            "dropped": 9
+          },
+          "ambient": 8,
+          "channels": 14,
+          "loadedAssets": 0
+        }
+      },
+      "samples": [
+        {
+          "children": 535,
+          "timers": 17,
+          "tweens": 0,
+          "metrics": {
+            "quality": "MEDIUM",
+            "effects": 14,
+            "limit": 100,
+            "sprites": {
+              "active": 9,
+              "allocated": 99,
+              "capacity": 100,
+              "peak": 99,
+              "dropped": 0
+            },
+            "labels": {
+              "active": 5,
+              "allocated": 14,
+              "capacity": 14,
+              "peak": 14,
+              "dropped": 1310
+            },
+            "particles": {
+              "active": 0,
+              "allocated": 224,
+              "capacity": 224,
+              "peak": 224,
+              "dropped": 3017
+            },
+            "visualTimers": 0,
+            "visualTweens": 0,
+            "playerStates": 0,
+            "presentations": {
+              "active": 1,
+              "pending": 5,
+              "capacity": 8,
+              "dropped": 37
+            },
+            "ambient": 8,
+            "channels": 5,
+            "loadedAssets": 0
+          }
+        },
+        {
+          "children": 535,
+          "timers": 17,
+          "tweens": 0,
+          "metrics": {
+            "quality": "MEDIUM",
+            "effects": 14,
+            "limit": 100,
+            "sprites": {
+              "active": 9,
+              "allocated": 99,
+              "capacity": 100,
+              "peak": 99,
+              "dropped": 0
+            },
+            "labels": {
+              "active": 5,
+              "allocated": 14,
+              "capacity": 14,
+              "peak": 14,
+              "dropped": 2340
+            },
+            "particles": {
+              "active": 0,
+              "allocated": 224,
+              "capacity": 224,
+              "peak": 224,
+              "dropped": 5127
+            },
+            "visualTimers": 0,
+            "visualTweens": 0,
+            "playerStates": 0,
+            "presentations": {
+              "active": 1,
+              "pending": 6,
+              "capacity": 8,
+              "dropped": 61
+            },
+            "ambient": 8,
+            "channels": 5,
+            "loadedAssets": 0
+          }
+        },
+        {
+          "children": 535,
+          "timers": 17,
+          "tweens": 0,
+          "metrics": {
+            "quality": "MEDIUM",
+            "effects": 14,
+            "limit": 100,
+            "sprites": {
+              "active": 9,
+              "allocated": 99,
+              "capacity": 100,
+              "peak": 99,
+              "dropped": 0
+            },
+            "labels": {
+              "active": 5,
+              "allocated": 14,
+              "capacity": 14,
+              "peak": 14,
+              "dropped": 4400
+            },
+            "particles": {
+              "active": 0,
+              "allocated": 224,
+              "capacity": 224,
+              "peak": 224,
+              "dropped": 9347
+            },
+            "visualTimers": 0,
+            "visualTweens": 0,
+            "playerStates": 0,
+            "presentations": {
+              "active": 1,
+              "pending": 6,
+              "capacity": 8,
+              "dropped": 111
+            },
+            "ambient": 8,
+            "channels": 5,
+            "loadedAssets": 0
+          }
+        }
+      ],
+      "drained": {
+        "children": 535,
+        "timers": 17,
+        "tweens": 0,
+        "metrics": {
+          "quality": "MEDIUM",
+          "effects": 0,
+          "limit": 100,
+          "sprites": {
+            "active": 0,
+            "allocated": 99,
+            "capacity": 100,
+            "peak": 99,
+            "dropped": 0
+          },
+          "labels": {
+            "active": 0,
+            "allocated": 14,
+            "capacity": 14,
+            "peak": 14,
+            "dropped": 4400
+          },
+          "particles": {
+            "active": 0,
+            "allocated": 224,
+            "capacity": 224,
+            "peak": 224,
+            "dropped": 9347
+          },
+          "visualTimers": 0,
+          "visualTweens": 0,
+          "playerStates": 0,
+          "presentations": {
+            "active": 0,
+            "pending": 0,
+            "capacity": 8,
+            "dropped": 117
+          },
+          "ambient": 8,
+          "channels": 0,
+          "loadedAssets": 0
+        }
+      },
+      "destroyed": {
+        "quality": "MEDIUM",
+        "effects": 0,
+        "limit": 100,
+        "sprites": {
+          "active": 0,
+          "allocated": 0,
+          "capacity": 100,
+          "peak": 99,
+          "dropped": 0
+        },
+        "labels": {
+          "active": 0,
+          "allocated": 0,
+          "capacity": 14,
+          "peak": 14,
+          "dropped": 4400
+        },
+        "particles": {
+          "active": 0,
+          "allocated": 0,
+          "capacity": 224,
+          "peak": 224,
+          "dropped": 9347
+        },
+        "visualTimers": 0,
+        "visualTweens": 0,
+        "playerStates": 0,
+        "presentations": {
+          "active": 0,
+          "pending": 0,
+          "capacity": 8,
+          "dropped": 117
+        },
+        "ambient": 0,
+        "channels": 0,
+        "loadedAssets": 0
+      }
+    }
+  ],
+  "assets": {
+    "imageSpritesheetAtlas": "passed (generated test fixtures)",
+    "missingFallback": "passed"
+  },
+  "baselineCommit": "82e27c43ac099d4b3d851b7b7bacbe8e11da7c6c",
+  "implementationCommit": "505776d",
+  "date": "2026-10-09",
+  "secondsPerLoad": 6,
+  "baselinePerformance": [
+    {
+      "fps": 59.8,
+      "p95ms": 16.7,
+      "children": 116,
+      "effects": 49,
+      "tweens": 49,
+      "timers": 4,
+      "metrics": null,
+      "active": 10
+    },
+    {
+      "fps": 60,
+      "p95ms": 16.8,
+      "children": 199,
+      "effects": 72,
+      "tweens": 74,
+      "timers": 8,
+      "metrics": null,
+      "active": 25
+    },
+    {
+      "fps": 60,
+      "p95ms": 16.8,
+      "children": 278,
+      "effects": 91,
+      "tweens": 91,
+      "timers": 12,
+      "metrics": null,
+      "active": 40
+    }
+  ],
+  "additionalChecks": {
+    "sceneRestarts": 3,
+    "shakeOff": "zero camera displacement",
+    "nodeTestsPassed": 27,
+    "functionalBrowser": "passed through 1000 registrations and portrait active cap 40"
+  }
+}

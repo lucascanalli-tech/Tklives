@@ -178,3 +178,24 @@ Gifts `giftType=1` aplicam somente o total terminal `repeatEnd=true`, conforme a
 - `.env` e `node_modules` são ignorados; servidor só entrega os arquivos públicos do jogo, não `.env`, Git, backend ou manifestos.
 
 [Histórico preservado da v0.08.1](docs/history-v0.08.1.md).
+## Atualização visual VFX
+
+A atualização de apresentação está na branch `feat/vfx-upgrade`, baseada na v0.09.0. Ela inclui pools de efeitos, combate visual, dissolve/portais, quatro tiers de gifts, qualidade LOW/MEDIUM/HIGH e laboratório `?debugVfx=1`, preservando as regras de gameplay.
+
+Para testar um clone existente no Windows:
+
+```powershell
+cd D:\projetos\Tklives
+git fetch origin
+git switch feat/vfx-upgrade
+npm.cmd ci
+npm.cmd start
+```
+
+Abra `http://localhost:8080/?mode=simulator&debugVfx=1`. Os comandos precisam ser executados dentro de `Tklives`, que contém `.git` e `package-lock.json`.
+
+- [Guia de VFX, arquitetura e primeiro clone](docs/VFX.md)
+- [Resultados, comparação de gameplay e imagens](docs/VFX_VALIDATION.md)
+- [Assets externos e licenças pendentes](docs/THIRD_PARTY_ASSETS.md)
+
+Os efeitos procedurais funcionam agora. Cooked FX/Flat Night e Kenney não foram importados porque suas licenças não puderam ser verificadas nesta rede.
