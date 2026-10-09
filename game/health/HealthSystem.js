@@ -29,7 +29,7 @@ export class HealthSystem {
     if (!this.player.isAlive() || amount <= 0) return false;
     this.currentHealth = Math.max(0, this.currentHealth - amount);
     this.updateBar();
-    this.player.hit();
+    this.player.hit(amount);
     if (this.currentHealth === 0) this.die(attacker);
     return true;
   }
@@ -43,7 +43,7 @@ export class HealthSystem {
     this.fill.setFillStyle(this.currentHealth > 35 ? 0x57f5bc : 0xff638e);
   }
   die(attacker) {
-    this.scene.visualEffects.ring(this.player, this.player.color, 35, 450);
+    this.scene.visualEffects.death(this.player);
     this.player.setAlive(false);
     this.background.setVisible(false);
     this.fill.setVisible(false);
@@ -66,7 +66,7 @@ export class HealthSystem {
     this.background.setVisible(true);
     this.fill.setVisible(true);
     this.update();
-    this.scene.visualEffects.ring(this.player, 0x57d4ff, 38, 650);
+    this.scene.visualEffects.respawn(this.player);
   }
   destroy() {
     this.respawnTimer?.remove(false);

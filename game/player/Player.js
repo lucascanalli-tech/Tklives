@@ -41,7 +41,7 @@ export class Player {
       .setDepth(5);
     this.setUsername(username);
     this.setPosition(x, y);
-    scene.visualEffects?.ring(this, color, 28, 550);
+    scene.visualEffects?.spawn(this);
   }
   setUsername(username) {
     this.username = String(username).startsWith("@")
@@ -94,20 +94,11 @@ export class Player {
     this.visualTimes.set(type, now + cooldown);
     return true;
   }
-  hit() {
-    this.scene.tweens.killTweensOf(this.body);
-    this.body.setScale(1);
-    this.body.setTintFill(0xffffff);
-    this.scene.tweens.add({
-      targets: this.body,
-      scaleX: 0.85,
-      scaleY: 1.1,
-      duration: 65,
-      yoyo: true,
-      onComplete: () => this.body?.clearTint(),
-    });
+  hit(damage = 0) {
+    this.scene.visualEffects?.hit(this, damage);
   }
   destroy() {
+    this.scene.visualEffects?.releasePlayer(this);
     this.scene.tweens.killTweensOf(this.body);
     this.avatar.destroy();
     this.nameText.destroy();

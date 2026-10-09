@@ -3,6 +3,9 @@ import { createProceduralTextures } from "./ProceduralTextures.js";
 import { readyVfxAssets } from "./VfxAssets.js";
 import { ObjectPool } from "./ObjectPool.js";
 import { ParticlePool } from "./ParticlePool.js";
+import { CombatEffects } from "./CombatEffects.js";
+import { DeathEffects } from "./DeathEffects.js";
+import { RespawnEffects } from "./RespawnEffects.js";
 
 export class EffectManager {
   constructor(scene, options = getVfxOptions(globalThis.location?.search)) {
@@ -17,6 +20,10 @@ export class EffectManager {
       stroke: "#081524", strokeThickness: 2, wordWrap: { width: 190 },
     }).setOrigin(0.5).setDepth(18), options.labels);
     this.particles = new ParticlePool(this); this.destroyed = false;
+    this.playerStates = new Map();
+    this.combat = new CombatEffects(this);
+    this.deaths = new DeathEffects(this);
+    this.portals = new RespawnEffects(this);
   }
   acquire(pool) { return this.objects.size < this.limit ? pool.acquire() : null; }
   track(object, duration, update, pool = this.sprites, channel = null) {
@@ -56,9 +63,44 @@ export class EffectManager {
     return this.track(object, duration, (o, p) => o.setY(y - p * 24).setAlpha(p < 0.7 ? 1 : (1 - p) / 0.3), this.labels, channel);
   }
   attack(player, target) {
-    const x = player.avatar.x, y = player.avatar.y, dx = target.avatar.x - x, dy = target.avatar.y - y;
-    const angle = Math.atan2(dy, dx), projectile = this.sprite("glow", x, y, player.color, 0.32);
-    this.track(projectile, 170, (o, p) => o.setPosition(x + dx * p, y + dy * p).setRotation(angle).setScale(0.45, 0.13).setAlpha(1 - p * 0.5));
+    this.combat.attack(player, target);
+  }
+  hit(player, damage) { this.combat.hit(player, damage); }
+  death(player) { this.deaths.show(player); }
+  spawn(player) { this.portals.show(player); }
+  respawn(player) { this.portals.show(player, true); }
+  punch(player) {
+    this.scene.tweens.killTweensOf(player.body);
+    const state = this.playerStates.get(player) ?? {};
+    state.punch = 0; this.playerStates.set(player, state);
+    player.body.setTintFill(0xffffff);
+  }
+  fadeName(player) {
+    const state = this.playerStates.get(player) ?? {};
+    state.name = 0; this.playerStates.set(player, state); player.nameText.setAlpha(0);
+  }
+  releasePlayer(player) {
+    this.playerStates.delete(player);
+    if (player.body?.scene) player.body.setX(0).setScale(1).clearTint();
+    if (player.nameText?.scene) player.nameText.setAlpha(1);
+    this.finish(this.channels.get(`damage:${player.userId}`));
+    this.finish(this.channels.get(`comment:${player.userId}`));
+  }
+  updatePlayers(delta) {
+    for (const [player, state] of this.playerStates) {
+      if (!player.body?.scene) { this.playerStates.delete(player); continue; }
+      if (state.punch !== undefined) {
+        state.punch += delta; const p = Math.min(1, state.punch / 140), bump = Math.sin(p * Math.PI);
+        // Only the body inside the avatar container moves; logical coordinates stay intact.
+        player.body.setX(Math.sin(p * Math.PI * 4) * (1 - p) * 1.7).setScale(1 - bump * 0.13, 1 + bump * 0.1);
+        if (p >= 1) { player.body.setX(0).setScale(1).clearTint(); delete state.punch; }
+      }
+      if (state.name !== undefined) {
+        state.name += delta; player.nameText.setAlpha(Math.min(1, state.name / 350));
+        if (state.name >= 350) delete state.name;
+      }
+      if (!Object.keys(state).length) this.playerStates.delete(player);
+    }
   }
   update(time, delta) {
     const step = Math.max(0, delta);
@@ -68,14 +110,17 @@ export class EffectManager {
       record.update(object, record.age / record.duration);
     }
     this.particles.update(step);
+    this.updatePlayers(step);
   }
   metrics() {
     return { quality: this.options.quality, effects: this.objects.size, limit: this.limit,
       sprites: this.sprites.metrics(), labels: this.labels.metrics(), particles: this.particles.pool.metrics(),
-      visualTimers: 0, visualTweens: 0, channels: this.channels.size, loadedAssets: this.assets.size };
+      visualTimers: 0, visualTweens: 0, playerStates: this.playerStates.size,
+      channels: this.channels.size, loadedAssets: this.assets.size };
   }
   destroy() {
     if (this.destroyed) return; this.destroyed = true;
+    for (const player of this.playerStates.keys()) this.releasePlayer(player);
     this.records.clear(); this.channels.clear(); this.objects.clear();
     this.particles.destroy(); this.sprites.destroy(); this.labels.destroy();
   }
