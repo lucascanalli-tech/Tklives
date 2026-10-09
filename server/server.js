@@ -70,6 +70,35 @@ function forwardEvent(event) {
   );
 }
 
+function logTikTokConnectionError(error) {
+  console.error('[TIKTOK] Não foi possível conectar:', error?.message ?? error);
+
+  const nestedErrors = [
+    ...(Array.isArray(error?.requestErrs) ? error.requestErrs : []),
+    ...(Array.isArray(error?.errors) ? error.errors : []),
+    error?.cause
+  ].filter(Boolean);
+
+  const seenMessages = new Set();
+
+  nestedErrors.forEach((nestedError, index) => {
+    const message = String(nestedError?.message ?? nestedError).trim();
+
+    if (!message || seenMessages.has(message)) {
+      return;
+    }
+
+    seenMessages.add(message);
+    console.error(`[TIKTOK][DIAG ${index + 1}] ${message}`);
+  });
+
+  if (nestedErrors.length === 0) {
+    console.error(
+      '[TIKTOK][DIAG] O conector não expôs detalhes adicionais para esta falha.'
+    );
+  }
+}
+
 const tiktokUsername = String(process.env.TIKTOK_USERNAME ?? '').trim();
 const tiktokConnector = tiktokUsername
   ? new TikTokConnector({ username: tiktokUsername, onEvent: forwardEvent })
@@ -101,7 +130,7 @@ httpServer.listen(port, async () => {
     console.log(`[TIKTOK] Conectando a ${tiktokUsername}...`);
     await tiktokConnector.connect();
   } catch (error) {
-    console.error('[TIKTOK] Não foi possível conectar:', error?.message ?? error);
+    logTikTokConnectionError(error);
     console.log('[SERVER] O jogo continuará disponível localmente.');
   }
 });
