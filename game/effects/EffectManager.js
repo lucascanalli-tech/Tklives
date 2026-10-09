@@ -6,6 +6,9 @@ import { ParticlePool } from "./ParticlePool.js";
 import { CombatEffects } from "./CombatEffects.js";
 import { DeathEffects } from "./DeathEffects.js";
 import { RespawnEffects } from "./RespawnEffects.js";
+import { ScreenEffects } from "./ScreenEffects.js";
+import { GiftPresentation } from "./GiftPresentation.js";
+import { InteractionPresentation } from "./InteractionPresentation.js";
 
 export class EffectManager {
   constructor(scene, options = getVfxOptions(globalThis.location?.search)) {
@@ -24,6 +27,9 @@ export class EffectManager {
     this.combat = new CombatEffects(this);
     this.deaths = new DeathEffects(this);
     this.portals = new RespawnEffects(this);
+    this.screen = new ScreenEffects(this);
+    this.gifts = new GiftPresentation(this);
+    this.interactions = new InteractionPresentation(this);
   }
   acquire(pool) { return this.objects.size < this.limit ? pool.acquire() : null; }
   track(object, duration, update, pool = this.sprites, channel = null) {
@@ -57,9 +63,15 @@ export class EffectManager {
     if (channel) this.finish(this.channels.get(channel));
     const object = this.acquire(this.labels); if (!object) return null;
     const a = this.scene.arenaBounds;
-    const x = Math.max(a.left + 100, Math.min(a.right - 100, player.avatar.x));
-    const y = Math.max(a.top + 65, player.avatar.y + offset);
-    object.setText(String(value).slice(0, 100)).setStyle({ color }).setPosition(x, y).setDepth(18);
+    object.setText(String(value).slice(0, 100)).setStyle({ color }).setDepth(18);
+    let x = Math.max(a.left + object.width / 2 + 8, Math.min(a.right - object.width / 2 - 8, player.avatar.x));
+    let y = Math.max(a.top + 65, player.avatar.y + offset);
+    if (channel?.startsWith("comment:")) {
+      const slot = this.commentSlot(x, y, object.width, object.height);
+      if (!slot) { this.labels.release(object); return null; }
+      ({ x, y } = slot);
+    }
+    object.setPosition(x, y);
     return this.track(object, duration, (o, p) => o.setY(y - p * 24).setAlpha(p < 0.7 ? 1 : (1 - p) / 0.3), this.labels, channel);
   }
   attack(player, target) {
@@ -69,6 +81,17 @@ export class EffectManager {
   death(player) { this.deaths.show(player); }
   spawn(player) { this.portals.show(player); }
   respawn(player) { this.portals.show(player, true); }
+  gift(player, event, tier = null) { this.gifts.show(player, event, tier); }
+  interaction(player, event) { this.interactions.show(player, event); }
+  commentSlot(x, y, width, height) {
+    const a = this.scene.arenaBounds;
+    const comments = [...this.channels].filter(([key]) => key.startsWith("comment:")).map(([, object]) => object.getBounds());
+    for (const offset of [0, -42, -84, 42]) {
+      const cy = Math.max(a.top + 48 + height / 2, Math.min(a.bottom - height / 2 - 8, y + offset));
+      if (comments.every(b => Math.abs(b.centerX - x) > (b.width + width) / 2 + 8 || Math.abs(b.centerY - cy) > (b.height + height) / 2 + 28)) return { x, y: cy };
+    }
+    return null;
+  }
   punch(player) {
     this.scene.tweens.killTweensOf(player.body);
     const state = this.playerStates.get(player) ?? {};
@@ -85,6 +108,7 @@ export class EffectManager {
     if (player.nameText?.scene) player.nameText.setAlpha(1);
     this.finish(this.channels.get(`damage:${player.userId}`));
     this.finish(this.channels.get(`comment:${player.userId}`));
+    for (const type of ["like", "follow", "share", "gift"]) this.finish(this.channels.get(`${type}:${player.userId}`));
   }
   updatePlayers(delta) {
     for (const [player, state] of this.playerStates) {
@@ -111,16 +135,21 @@ export class EffectManager {
     }
     this.particles.update(step);
     this.updatePlayers(step);
+    this.gifts.update(step);
+    this.screen.update(step);
   }
   metrics() {
     return { quality: this.options.quality, effects: this.objects.size, limit: this.limit,
       sprites: this.sprites.metrics(), labels: this.labels.metrics(), particles: this.particles.pool.metrics(),
       visualTimers: 0, visualTweens: 0, playerStates: this.playerStates.size,
+      presentations: { active: this.gifts.queue.active ? 1 : 0, pending: this.gifts.queue.pending.length,
+        capacity: this.gifts.queue.capacity, dropped: this.gifts.queue.dropped }, ambient: this.screen.ambient.length,
       channels: this.channels.size, loadedAssets: this.assets.size };
   }
   destroy() {
     if (this.destroyed) return; this.destroyed = true;
     for (const player of this.playerStates.keys()) this.releasePlayer(player);
+    this.gifts.destroy(); this.screen.destroy();
     this.records.clear(); this.channels.clear(); this.objects.clear();
     this.particles.destroy(); this.sprites.destroy(); this.labels.destroy();
   }

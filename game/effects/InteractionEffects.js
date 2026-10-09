@@ -19,25 +19,7 @@ export class InteractionEffects {
       duration: config.duration,
     });
     if (!player.allowVisual(event.type, config.cooldown)) return;
-    const fx = this.scene.visualEffects;
-    if (event.type === "COMMENT")
-      fx.text(
-        player,
-        `“${event.data.message.slice(0, 64)}”`,
-        "#e8f6ff",
-        -72,
-        2200,
-      );
-    if (event.type === "LIKE")
-      fx.text(player, `♥ +${event.data.count}`, "#ff7bba", -58, 850);
-    if (event.type === "FOLLOW") {
-      fx.ring(player, 0x57f5bc);
-      fx.text(player, "NOVO FOLLOW", "#7fffd2");
-    }
-    if (event.type === "SHARE") {
-      fx.ring(player, 0x57d4ff, 45);
-      fx.text(player, "SHARE ↑", "#91e6ff");
-    }
+    this.scene.visualEffects.interaction(player, event);
   }
   destroy() {
     this.unsubscribe?.();
