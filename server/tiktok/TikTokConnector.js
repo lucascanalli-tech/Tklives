@@ -14,9 +14,13 @@ const EVENT_BINDINGS = [
   [WebcastEvent.SHARE, 'SHARE']
 ];
 
+function normalizeBroadcasterUsername(username) {
+  return String(username ?? '').trim().replace(/^@+/, '');
+}
+
 export class TikTokConnector {
   constructor({ username, onEvent }) {
-    this.username = String(username ?? '').trim();
+    this.username = normalizeBroadcasterUsername(username);
     this.onEvent = onEvent;
     this.connection = null;
   }
@@ -30,7 +34,11 @@ export class TikTokConnector {
       return;
     }
 
-    const connection = new TikTokLiveConnection(this.username);
+    const connection = new TikTokLiveConnection(this.username, {
+      processInitialData: false,
+      fetchRoomInfoOnConnect: true,
+      enableExtendedGiftInfo: true
+    });
     this.connection = connection;
 
     EVENT_BINDINGS.forEach(([externalType, internalType]) => {
