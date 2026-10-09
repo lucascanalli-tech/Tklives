@@ -7,10 +7,11 @@ export class ParticipantRegistry {
     this.queueHead = 0;
     this.queuedUserIds = new Set();
     this.listeners = new Set();
+    this.botCount = 0;
   }
 
   register(event) {
-    const userId = String(event?.userId ?? '').trim();
+    const userId = String(event?.userId ?? "").trim();
 
     if (!userId) {
       return { participant: null, isNew: false };
@@ -27,10 +28,12 @@ export class ParticipantRegistry {
         lastSeenAt: event.timestamp,
         lastEventType: event.type,
         interactionCount: 0,
-        status: 'registered'
+        status: "registered",
+        isBot: userId.startsWith("bot:"),
       };
 
       this.participants.set(userId, participant);
+      if (participant.isBot) this.botCount += 1;
     }
 
     participant.username = event.username || participant.username;
@@ -53,29 +56,29 @@ export class ParticipantRegistry {
     const participant = this.get(userId);
 
     if (!participant) {
-      return { status: 'missing', participant: null };
+      return { status: "missing", participant: null };
     }
 
     if (this.activeUserIds.has(participant.userId)) {
-      return { status: 'active', participant };
+      return { status: "active", participant };
     }
 
     if (this.queuedUserIds.has(participant.userId)) {
-      return { status: 'queued', participant };
+      return { status: "queued", participant };
     }
 
     if (this.activeUserIds.size < this.maxActivePlayers) {
       this.activeUserIds.add(participant.userId);
-      participant.status = 'active';
+      participant.status = "active";
       this.notify();
 
-      return { status: 'activated', participant };
+      return { status: "activated", participant };
     }
 
     this.enqueue(participant.userId);
     this.notify();
 
-    return { status: 'queued', participant };
+    return { status: "queued", participant };
   }
 
   releaseActive(userId, { requeue = false } = {}) {
@@ -85,7 +88,7 @@ export class ParticipantRegistry {
       return null;
     }
 
-    participant.status = 'registered';
+    participant.status = "registered";
 
     const promoted = this.promoteNext();
 
@@ -111,7 +114,7 @@ export class ParticipantRegistry {
         this.activeUserIds.size < this.maxActivePlayers
       ) {
         this.activeUserIds.add(userId);
-        participant.status = 'active';
+        participant.status = "active";
         this.compactQueue();
 
         return participant;
@@ -135,7 +138,7 @@ export class ParticipantRegistry {
 
     this.queue.push(userId);
     this.queuedUserIds.add(userId);
-    participant.status = 'queued';
+    participant.status = "queued";
 
     return true;
   }
@@ -148,11 +151,15 @@ export class ParticipantRegistry {
   }
 
   getStats() {
+    const bots = [...this.activeUserIds].filter(
+      (id) => this.get(id)?.isBot,
+    ).length;
     return {
-      registered: this.participants.size,
+      registered: this.participants.size - this.botCount,
       active: this.activeUserIds.size,
       queued: this.queuedUserIds.size,
-      maxActive: this.maxActivePlayers
+      maxActive: this.maxActivePlayers,
+      bots,
     };
   }
 
@@ -161,6 +168,14 @@ export class ParticipantRegistry {
     listener(this.getStats());
 
     return () => this.listeners.delete(listener);
+  }
+
+  removeBot(userId) {
+    if (!this.get(userId)?.isBot) return;
+    this.activeUserIds.delete(userId);
+    this.participants.delete(userId);
+    this.botCount -= 1;
+    this.notify();
   }
 
   notify() {

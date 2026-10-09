@@ -1,7 +1,6 @@
 const ATTACK_RANGE = 150;
 const ATTACK_COOLDOWN = 900;
 const SEARCH_INTERVAL = 180;
-const EFFECT_DURATION = 140;
 const ATTACK_DAMAGE = 20;
 
 export class AutoCombat {
@@ -41,7 +40,7 @@ export class AutoCombat {
         this.player.avatar.x,
         this.player.avatar.y,
         candidate.avatar.x,
-        candidate.avatar.y
+        candidate.avatar.y,
       );
 
       if (distance <= nearestDistance) {
@@ -55,28 +54,18 @@ export class AutoCombat {
 
   attack(target) {
     const damageApplied = target.health?.takeDamage(
-      ATTACK_DAMAGE,
-      this.player
+      Math.round(
+        (ATTACK_DAMAGE + Math.min(10, this.player.energy / 10)) *
+          this.player.damageMultiplier,
+      ),
+      this.player,
     );
 
     if (!damageApplied) {
       return;
     }
 
-    const effect = this.scene.add.graphics();
-    effect.lineStyle(4, 0xfde047, 0.95);
-    effect.lineBetween(
-      this.player.avatar.x,
-      this.player.avatar.y,
-      target.avatar.x,
-      target.avatar.y
-    );
-
-    this.scene.tweens.add({
-      targets: effect,
-      alpha: 0,
-      duration: EFFECT_DURATION,
-      onComplete: () => effect.destroy()
-    });
+    this.player.energy = Math.max(0, this.player.energy - 4);
+    this.scene.visualEffects.attack(this.player, target);
   }
 }

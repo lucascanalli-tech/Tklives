@@ -1,5 +1,5 @@
 function getUserId(playerOrUserId) {
-  if (typeof playerOrUserId === 'string') {
+  if (typeof playerOrUserId === "string") {
     return playerOrUserId;
   }
 
@@ -12,11 +12,13 @@ export class ScoreSystem {
     this.listeners = new Set();
     this.nextOrder = 0;
 
-    participants.forEach((participant) => this.addParticipant(participant, false));
+    participants.forEach((participant) =>
+      this.addParticipant(participant, false),
+    );
   }
 
   addParticipant(participant, notify = true) {
-    const userId = String(participant?.userId ?? '').trim();
+    const userId = String(participant?.userId ?? "").trim();
 
     if (!userId) {
       return false;
@@ -25,7 +27,10 @@ export class ScoreSystem {
     const existing = this.entries.get(userId);
 
     if (existing) {
+      const changed =
+        participant.username && existing.username !== participant.username;
       existing.username = participant.username || existing.username;
+      if (changed && notify) this.notify();
       return false;
     }
 
@@ -33,7 +38,8 @@ export class ScoreSystem {
       userId,
       username: participant.username,
       score: 0,
-      order: this.nextOrder++
+      order: this.nextOrder++,
+      isBot: Boolean(participant.isBot),
     });
 
     if (notify) {
@@ -71,6 +77,7 @@ export class ScoreSystem {
 
   getRanking(limit = null) {
     const ranking = Array.from(this.entries.values())
+      .filter((entry) => !entry.isBot)
       .sort((a, b) => b.score - a.score || a.order - b.order);
 
     return Number.isInteger(limit) && limit > 0
@@ -83,6 +90,11 @@ export class ScoreSystem {
     listener();
 
     return () => this.listeners.delete(listener);
+  }
+
+  resetRound() {
+    for (const entry of this.entries.values()) entry.score = 0;
+    this.notify();
   }
 
   notify() {

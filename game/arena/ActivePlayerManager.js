@@ -1,17 +1,12 @@
-import { AutoCombat } from '../combat/AutoCombat.js';
-import { SpatialGrid } from '../combat/SpatialGrid.js';
-import { COMBAT_CELL_SIZE } from '../config/GameConfig.js';
-import { HealthSystem } from '../health/HealthSystem.js';
-import { AutoMovement } from '../movement/AutoMovement.js';
-import { Player } from '../player/Player.js';
+import { AutoCombat } from "../combat/AutoCombat.js";
+import { SpatialGrid } from "../combat/SpatialGrid.js";
+import { COMBAT_CELL_SIZE } from "../config/GameConfig.js";
+import { HealthSystem } from "../health/HealthSystem.js";
+import { AutoMovement } from "../movement/AutoMovement.js";
+import { Player } from "../player/Player.js";
 
 const PLAYER_COLORS = [
-  0x38bdf8,
-  0xf472b6,
-  0xfbbf24,
-  0x34d399,
-  0xa78bfa,
-  0xfb7185
+  0x38bdf8, 0xf472b6, 0xfbbf24, 0x34d399, 0xa78bfa, 0xfb7185,
 ];
 
 export class ActivePlayerManager {
@@ -28,10 +23,10 @@ export class ActivePlayerManager {
   requestParticipant(participant) {
     const result = this.registry.requestActivation(participant.userId);
 
-    if (result.status === 'activated') {
+    if (result.status === "activated") {
       this.activate(result.participant);
     } else if (
-      result.status === 'active' &&
+      result.status === "active" &&
       !this.entries.has(participant.userId)
     ) {
       this.activate(result.participant);
@@ -45,8 +40,7 @@ export class ActivePlayerManager {
       return this.entries.get(participant.userId).player;
     }
 
-    const color =
-      PLAYER_COLORS[this.nextColorIndex % PLAYER_COLORS.length];
+    const color = PLAYER_COLORS[this.nextColorIndex % PLAYER_COLORS.length];
 
     this.nextColorIndex += 1;
 
@@ -55,27 +49,24 @@ export class ActivePlayerManager {
       username: participant.username,
       x: Phaser.Math.FloatBetween(
         this.arenaBounds.left + 120,
-        this.arenaBounds.right - 120
+        this.arenaBounds.right - 120,
       ),
       y: Phaser.Math.FloatBetween(
         this.arenaBounds.top + 100,
-        this.arenaBounds.bottom - 60
+        this.arenaBounds.bottom - 60,
       ),
       color,
-      bounds: this.arenaBounds
+      bounds: this.arenaBounds,
+      isBot: participant.isBot,
     });
 
-    const health = new HealthSystem(
-      this.scene,
-      player,
-      (attacker, victim) => this.scoreSystem.registerKill(attacker, victim)
+    const health = new HealthSystem(this.scene, player, (attacker, victim) =>
+      this.scoreSystem.registerKill(attacker, victim),
     );
 
     const movement = new AutoMovement(player);
-    const combat = new AutoCombat(
-      this.scene,
-      player,
-      () => this.spatialGrid.getNearby(player)
+    const combat = new AutoCombat(this.scene, player, () =>
+      this.spatialGrid.getNearby(player),
     );
 
     this.entries.set(participant.userId, {
@@ -83,7 +74,7 @@ export class ActivePlayerManager {
       player,
       health,
       movement,
-      combat
+      combat,
     });
 
     return player;
@@ -96,11 +87,13 @@ export class ActivePlayerManager {
   update(time, delta) {
     const activeEntries = Array.from(this.entries.values());
 
-    activeEntries.forEach(({ movement }) => movement.update(time, delta));
-
-    this.spatialGrid.rebuild(
-      activeEntries.map(({ player }) => player)
+    activeEntries.forEach(({ player }) => player.update(time));
+    if (this.scene.roundManager?.phase !== "ACTIVE") return;
+    activeEntries.forEach(({ movement }) =>
+      movement.update(time, Math.min(delta, 80)),
     );
+
+    this.spatialGrid.rebuild(activeEntries.map(({ player }) => player));
 
     activeEntries.forEach(({ combat }) => combat.update(time));
     activeEntries.forEach(({ health }) => health.update());

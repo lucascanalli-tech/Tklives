@@ -2,14 +2,14 @@ const JOIN_BATCH_SIZE = 25;
 const JOIN_BATCH_INTERVAL = 100;
 const INTERACTION_INTERVAL = 90;
 
-const RANDOM_EVENTS = ['COMMENT', 'LIKE', 'FOLLOW', 'GIFT', 'SHARE'];
+const RANDOM_EVENTS = ["COMMENT", "LIKE", "FOLLOW", "GIFT", "SHARE"];
 
 function makeUser(index) {
-  const number = String(index + 1).padStart(4, '0');
+  const number = String(index + 1).padStart(4, "0");
 
   return {
     userId: `load-${number}`,
-    username: `Load${number}`
+    username: `Load${number}`,
   };
 }
 
@@ -17,7 +17,9 @@ export class LoadTestSimulator {
   constructor(eventBus, { userCount }) {
     this.eventBus = eventBus;
     this.userCount = userCount;
-    this.users = Array.from({ length: userCount }, (_, index) => makeUser(index));
+    this.users = Array.from({ length: userCount }, (_, index) =>
+      makeUser(index),
+    );
     this.joinIndex = 0;
     this.joinInterval = null;
     this.interactionInterval = null;
@@ -31,6 +33,9 @@ export class LoadTestSimulator {
     }
 
     this.running = true;
+    this.emit("COMMENT", this.users[0], {
+      message: "Primeira interação antes de JOIN",
+    });
     this.emitJoinBatch();
 
     this.joinInterval = setInterval(() => {
@@ -45,13 +50,10 @@ export class LoadTestSimulator {
   }
 
   emitJoinBatch() {
-    const end = Math.min(
-      this.joinIndex + JOIN_BATCH_SIZE,
-      this.users.length
-    );
+    const end = Math.min(this.joinIndex + JOIN_BATCH_SIZE, this.users.length);
 
     while (this.joinIndex < end) {
-      this.emit('JOIN', this.users[this.joinIndex]);
+      this.emit("JOIN", this.users[this.joinIndex]);
       this.joinIndex += 1;
     }
   }
@@ -61,18 +63,45 @@ export class LoadTestSimulator {
 
     this.interactionInterval = setInterval(
       () => this.emitRandomInteraction(),
-      INTERACTION_INTERVAL
+      INTERACTION_INTERVAL,
     );
   }
 
   emitCoverageInteractions() {
-    const types = ['COMMENT', 'LIKE', 'FOLLOW', 'GIFT', 'SHARE'];
+    this.emit("COMMENT", this.users[0], {
+      message: "Texto longo ".repeat(100),
+    });
+    if (this.users.length > 1)
+      this.emit(
+        "COMMENT",
+        { ...this.users[1], username: this.users[0].username },
+        { message: "Mesmo username, outro userId" },
+      );
+    for (let i = 0; i < 200; i++)
+      this.emit("LIKE", this.users[0], { count: 1 });
+    this.emit("GIFT", this.users[0], {
+      giftId: "unknown",
+      giftName: "Presente desconhecido",
+      quantity: 1,
+    });
+    const groupId = `load-combo-${Date.now()}`;
+    for (let i = 1; i <= 3; i++)
+      this.emit("GIFT", this.users[0], {
+        giftId: "rose",
+        giftName: "Rose",
+        quantity: i,
+        repeatCount: i,
+        giftType: 1,
+        repeatEnd: i === 3,
+        groupId,
+      });
+    const types = ["COMMENT", "LIKE", "FOLLOW", "GIFT", "SHARE"];
 
     types.forEach((type, index) => {
       const user = this.users[index % this.users.length];
       const timeout = setTimeout(
         () => this.emitInteraction(type, user),
-        150 + index * 120
+        150 + index * 120,
       );
 
       this.timeouts.push(timeout);
@@ -80,17 +109,14 @@ export class LoadTestSimulator {
   }
 
   emitRandomInteraction() {
-    const user = this.users[
-      Math.floor(Math.random() * this.users.length)
-    ];
-    const type = RANDOM_EVENTS[
-      Math.floor(Math.random() * RANDOM_EVENTS.length)
-    ];
+    const user = this.users[Math.floor(Math.random() * this.users.length)];
+    const type =
+      RANDOM_EVENTS[Math.floor(Math.random() * RANDOM_EVENTS.length)];
 
-    if (type === 'LIKE') {
+    if (type === "LIKE") {
       for (let index = 0; index < 4; index += 1) {
-        this.emit('LIKE', user, {
-          count: Math.floor(Math.random() * 3) + 1
+        this.emit("LIKE", user, {
+          count: Math.floor(Math.random() * 3) + 1,
         });
       }
 
@@ -102,12 +128,12 @@ export class LoadTestSimulator {
 
   emitInteraction(type, user) {
     const data =
-      type === 'COMMENT'
-        ? { message: 'Teste de carga Live Arena' }
-        : type === 'LIKE'
+      type === "COMMENT"
+        ? { message: "Teste de carga Live Arena" }
+        : type === "LIKE"
           ? { count: 3 }
-          : type === 'GIFT'
-            ? { giftName: 'Rose', quantity: 1 }
+          : type === "GIFT"
+            ? { giftName: "Rose", quantity: 1 }
             : {};
 
     this.emit(type, user, data);
@@ -119,7 +145,7 @@ export class LoadTestSimulator {
       userId: user.userId,
       username: user.username,
       timestamp: Date.now(),
-      ...data
+      ...data,
     });
   }
 

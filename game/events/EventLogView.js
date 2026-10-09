@@ -1,99 +1,71 @@
-const PANEL_WIDTH = 330;
-const PANEL_HEIGHT = 238;
-const PADDING = 14;
-const HEADER_HEIGHT = 34;
-const ROW_HEIGHT = 25;
-const MAX_ROWS = 7;
-const RENDER_DELAY = 80;
-
-function describeEvent(event) {
-  switch (event.type) {
-    case 'JOIN':
-      return `${event.username} entrou`;
-    case 'COMMENT':
-      return `${event.username}: ${event.message ?? ''}`;
-    case 'LIKE':
-      return `${event.username} +${event.count ?? 1} likes`;
-    case 'FOLLOW':
-      return `${event.username} seguiu`;
-    case 'GIFT':
-      return `${event.username} enviou ${event.giftName ?? 'gift'} x${event.quantity ?? 1}`;
-    case 'SHARE':
-      return `${event.username} compartilhou`;
-    default:
-      return `${event.type} • ${event.username}`;
-  }
-}
-
 export class EventLogView {
-  constructor(scene, eventBus, { x, y }) {
+  constructor(
+    scene,
+    eventBus,
+    { x, y, width = 238, visible = true, mode = "SIMULATOR" },
+  ) {
     this.scene = scene;
     this.events = [];
     this.renderTimer = null;
-
+    this.rows = [];
     this.background = scene.add
-      .rectangle(x, y, PANEL_WIDTH, PANEL_HEIGHT, 0x0f172a, 0.88)
-      .setOrigin(0, 0)
-      .setStrokeStyle(2, 0xa78bfa, 0.8)
-      .setDepth(20);
-
+      .rectangle(x, y, width, 168, 0x0a182a, 0.96)
+      .setOrigin(0)
+      .setStrokeStyle(1, 0x24415c)
+      .setDepth(20)
+      .setVisible(visible);
     this.title = scene.add
-      .text(x + PADDING, y + PADDING, 'EVENTOS • SIMULADOR', {
-        fontFamily: 'Arial, sans-serif',
-        fontSize: '18px',
-        fontStyle: 'bold',
-        color: '#f8fafc'
-      })
-      .setDepth(21);
-
-    this.rows = Array.from({ length: MAX_ROWS }, (_, index) =>
-      scene.add
-        .text(
-          x + PADDING,
-          y + PADDING + HEADER_HEIGHT + index * ROW_HEIGHT,
-          '',
-          {
-            fontFamily: 'Arial, sans-serif',
-            fontSize: '15px',
-            color: '#e2e8f0'
-          }
-        )
-        .setDepth(21)
-    );
-
+      .text(
+        x + 16,
+        y + 14,
+        mode === "LIVE" ? "INTERAÇÕES" : "SIMULADOR / EVENTOS",
+        {
+          fontFamily: "Arial, sans-serif",
+          fontSize: "11px",
+          fontStyle: "bold",
+          color: "#57d4ff",
+          letterSpacing: 1,
+        },
+      )
+      .setDepth(21)
+      .setVisible(visible);
+    for (let i = 0; i < 5; i++)
+      this.rows.push(
+        scene.add
+          .text(x + 16, y + 40 + i * 23, "", {
+            fontFamily: "Arial, sans-serif",
+            fontSize: "11px",
+            color: "#8fa9c3",
+          })
+          .setDepth(21)
+          .setVisible(visible),
+      );
     this.unsubscribe = eventBus.subscribe((event) => this.addEvent(event));
   }
-
   addEvent(event) {
-    this.events.unshift(`[${event.type}] ${describeEvent(event)}`);
-    this.events = this.events.slice(0, MAX_ROWS);
-    this.scheduleRender();
+    const d = event.data;
+    if (event.type === "GIFT" && d.giftType === 1 && !d.repeatEnd) return;
+    const detail =
+      event.type === "COMMENT"
+        ? d.message.slice(0, 32)
+        : event.type === "LIKE"
+          ? `♥ +${d.count}`
+          : event.type === "GIFT"
+            ? `${d.giftName} ×${d.quantity}`
+            : event.type;
+    this.events.unshift(`${event.username.slice(0, 16)} · ${detail}`);
+    this.events = this.events.slice(0, 5);
+    if (!this.renderTimer)
+      this.renderTimer = this.scene.time.delayedCall(80, () => {
+        this.renderTimer = null;
+        this.rows.forEach((row, i) => row.setText(this.events[i] ?? ""));
+      });
   }
-
-  scheduleRender() {
-    if (this.renderTimer) {
-      return;
-    }
-
-    this.renderTimer = this.scene.time.delayedCall(RENDER_DELAY, () => {
-      this.renderTimer = null;
-      this.render();
-    });
-  }
-
-  render() {
-    this.rows.forEach((row, index) => {
-      row.setText(this.events[index] ?? '');
-    });
-  }
-
   destroy() {
     this.unsubscribe?.();
-    this.unsubscribe = null;
     this.renderTimer?.remove(false);
-    this.renderTimer = null;
     this.background.destroy();
     this.title.destroy();
-    this.rows.forEach((row) => row.destroy());
+    this.rows.forEach((r) => r.destroy());
   }
 }

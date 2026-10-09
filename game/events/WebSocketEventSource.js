@@ -1,71 +1,91 @@
 export class WebSocketEventSource {
-  constructor(eventBus, url = null) {
+  constructor(
+    eventBus,
+    url = null,
+    {
+      onStatus = () => {},
+      createSocket = (value) => new WebSocket(value),
+      schedule = setTimeout,
+      cancel = clearTimeout,
+    } = {},
+  ) {
     this.eventBus = eventBus;
-    this.url = url ?? this.getDefaultUrl();
+    this.url =
+      url ??
+      `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/events`;
+    this.onStatus = onStatus;
+    this.createSocket = createSocket;
+    this.schedule = schedule;
+    this.cancel = cancel;
     this.socket = null;
-    this.seenUsers = new Set();
+    this.retryTimer = null;
+    this.attempt = 0;
+    this.running = false;
   }
-
-  getDefaultUrl() {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    return `${protocol}//${window.location.host}/events`;
-  }
-
   start() {
-    if (this.socket) {
+    this.running = true;
+    if (this.socket || this.retryTimer) return;
+    this.open();
+  }
+  open() {
+    if (!this.running) return;
+    this.onStatus({ transport: this.attempt ? "RECONNECTING" : "CONNECTING" });
+    let socket;
+    try {
+      socket = this.createSocket(this.url);
+    } catch {
+      this.retry();
       return;
     }
-
-    this.socket = new WebSocket(this.url);
-
-    this.socket.addEventListener('open', () => {
-      console.info('[WS] Live Arena conectada ao backend.');
+    this.socket = socket;
+    socket.addEventListener("open", () => {
+      if (socket !== this.socket) return;
+      this.attempt = 0;
+      this.onStatus({ transport: "CONNECTED" });
     });
-
-    this.socket.addEventListener('message', (message) => {
+    socket.addEventListener("message", (message) => {
+      if (
+        socket !== this.socket ||
+        typeof message.data !== "string" ||
+        message.data.length > 16384
+      )
+        return;
       try {
         const event = JSON.parse(message.data);
-        this.publish(event);
-      } catch (error) {
-        console.warn('[WS] Evento inválido ignorado.', error);
+        if (event?.type === "STATUS") {
+          this.onStatus({ ...event.data, transport: "CONNECTED" });
+        } else this.eventBus.publish(event);
+      } catch {
+        console.warn("[WS] Mensagem inválida ignorada.");
       }
     });
-
-    this.socket.addEventListener('close', () => {
-      console.warn('[WS] Backend desconectado.');
+    socket.addEventListener("close", () => {
+      if (socket !== this.socket) return;
       this.socket = null;
+      if (this.running) this.retry();
     });
-
-    this.socket.addEventListener('error', () => {
-      console.warn('[WS] Falha na conexão com o backend.');
+    socket.addEventListener("error", () => {
+      if (socket === this.socket) socket.close();
     });
   }
-
+  retry() {
+    if (!this.running || this.retryTimer) return;
+    const delay = Math.min(15000, 500 * 2 ** Math.min(this.attempt++, 5));
+    this.onStatus({ transport: "RECONNECTING", retryInMs: delay });
+    this.retryTimer = this.schedule(() => {
+      this.retryTimer = null;
+      this.open();
+    }, delay);
+  }
   publish(event) {
-    const userId = String(event?.userId ?? '').trim();
-
-    if (!userId) {
-      return;
-    }
-
-    if (!this.seenUsers.has(userId) && event.type !== 'JOIN') {
-      this.eventBus.publish({
-        type: 'JOIN',
-        userId,
-        username: event.username,
-        timestamp: event.timestamp
-      });
-      this.seenUsers.add(userId);
-    }
-
-    if (this.eventBus.publish(event) && event.type === 'JOIN') {
-      this.seenUsers.add(userId);
-    }
+    return this.eventBus.publish(event);
   }
-
   stop() {
-    this.socket?.close();
+    this.running = false;
+    if (this.retryTimer) this.cancel(this.retryTimer);
+    this.retryTimer = null;
+    const socket = this.socket;
     this.socket = null;
-    this.seenUsers.clear();
+    socket?.close();
   }
 }
